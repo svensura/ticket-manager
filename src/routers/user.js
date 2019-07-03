@@ -5,6 +5,7 @@ const router = new express.Router()
 
 router.post('/users', async (req, res) => {
     const user = new User(req.body)
+    console.log(req.body)
     try {
         await user.save()
         const token = await user.generateAuthToken()
@@ -105,7 +106,6 @@ router.get('/users/:id', auth, async (req, res) => {
 
 router.patch('/users/:id', auth, async (req, res) => {
     const updates = Object.keys(req.body)
-    console.log(req.body)
     const allowedUpdates = ['name', 'email', 'password', 'phone']
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
 
