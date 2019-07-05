@@ -6,31 +6,33 @@
     <meta charset="utf-8">
     <title>Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1", user-scalable="no">
-    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/signin.css">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    
+
 </head>
 
 
 
-    <body class="centered-form">
-        <div class="centered-form__form" id="div_login">
-            <div class="form-field">
-                <h3>Login</h3>
-            </div>
-            <div id="message"></div>
-            <div class="form-field">
-                <label>Email</label>
-                <input type="text" class="textbox" id="txt_uname" name="txt_uname" />
-            </div>
-            <div class="form-field">
-                <label>Password</label>
-                <input type="password" class="textbox" id="txt_pwd" name="txt_pwd" />
-            </div>
-            <div class="form-field">
-                <input type="button" value="Submit" name="but_submit" id="but_submit" />
-            </div>
-         </div>
-            
-            
+    <body>
+       
+            <form class="form-signin" id="div_login">
+                    <div class="col-sm-6">
+                            <h2>Login</h2>
+                        </div>
+                </div>
+                <div id="message"></div>
+                <label for="inputEmail" class="sr-only">Email address</label>
+                    <input type="email" id="txt_uname" class="form-control" placeholder="Email address" required autofocus>
+                    <label for="inputPassword" class="sr-only">Password</label>
+                    <input type="password" id="txt_pwd" class="form-control" placeholder="Password" required>
+                <div class="form-field-blue">
+                    <input class="btn btn-lg btn-primary btn-block" type="button" value="Submit" name="but_submit" id="but_submit" />
+                </div>
+            </form>
+          
+
+   
     </body>
 
     <script src="/js/libs/jquery-3.3.1.js"></script>

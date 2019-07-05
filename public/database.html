@@ -2,91 +2,163 @@
 
 <html>
 
-  <head>
-    <meta charset="utf-8">
-    <title>Database</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1", user-scalable=no">
-    <link rel="stylesheet" href="/css/bootstrap.min.css">
-  </head>
+<head>
+  <meta charset="utf-8">
+  <title>Database</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" , user-scalable=no">
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/popup.css">
 
-  <body>
-      <input type="hidden" id="userid" value="0" />
-    <div class="container">
-        <div class="row">
-          <div class="col-sm-6">
-            <h2>Users</h2>
-          </div>
-        </div>
+</head>
 
-        <div class="row">
-          <div class="col-sm-6">
-            <table id="userTable"
-                   class="table table-bordered
-                         table-condensed table-striped">
-              <thead>
-                <tr>
-                  <th>Edit</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Delete</th>
-                </tr>
-              </thead>
-            </table>
-          </div>
-        </div>
+<body>
+  <input type="hidden" id="storeid" value="0" />
+ 
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-6">
+        <h2>Users</h2>
+      </div>
+      <div class="col-xs-12">
+        <button type="button" class="btn btn-primary" onclick="userOpenForm();">
+          Add
+        </button>
+      </div>
+    </div>
 
+    <div class="row">
+      <div class="col-sm-6">
+        <table id="userTable" class="table table-bordered
+              table-condensed table-striped">
+          <thead>
+            <tr>
+              <th>Edit</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+    </div>
 
-
-        <div class="form-group">
+    <div class="form-popup" id="userForm">
+      <div class="container">
+        <div class="form-field">
           <label for="username">Name</label>
-          <input type="text" id="username"
-                 class="form-control" />
+          <input type="text" id="username" class="form-control" autofocus/>
         </div>
-        <div class="form-group">
-          <label for="email">Email
-          </label>
-          <input type="text" id="email"
-                 class="form-control" />
+        <div class="form-field">
+          <label for="email">Email</label>
+          <input type="text" id="email" class="form-control" />
         </div>
-        <div class="form-group">
+        <div class="form-field">
           <label for="phone">Phone</label>
-          <input type="text" id="phone"
-                 class="form-control" />
+          <input type="text" id="phone" class="form-control" />
         </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password"
-                   class="form-control" />
-          </div>
-
+        <div class="form-field">
+          <label for="password">Password</label>
+          <input type="password" id="password" class="form-control" />
+        </div>
         <div class="row">
           <div class="col-xs-12">
-            <button type="button" id="updateButton"
-                    class="btn btn-primary"
-                    onclick="updateClick();">
+            <button type="button" id="userUpdateButton" class="btn btn-primary" onclick="userUpdateClick();">
               Add
-           </button>
+            </button>
+            <button type="button" id="userCloseButton" class="btn btn-primary" onclick="userFormClear();">
+              Back
+            </button>
           </div>
         </div>
-
       </div>
-
-      <script src="/js/libs/jquery-3.3.1.js"></script>
-      
-      <script src="/js/libs/bootstrap.min.js"></script>
-        
-      <script src="/js/libs/moment.js"></script>
-
-      <script src="/js/libs/mustache.js"></script>
-
-      <script src="/js/libs/deparam.js"></script>
-
-      <script src="/js/database.js"></script>
+    </div>
+  </div>
 
 
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-6">
+        <h2>Venues</h2>
+      </div>
+      <div class="col-xs-12">
+        <button type="button" class="btn btn-primary" onclick="venueOpenForm();">
+          Add
+        </button>
+      </div>
+    </div>
 
-  </body>
+    <div class="row">
+      <div class="col-sm-6">
+        <table id="venueTable" class="table table-bordered
+                    table-condensed table-striped">
+          <thead>
+            <tr>
+              <th>Edit</th>
+              <th>Address</th>
+              <th>Contact</th>
+              <th>Seats</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+    </div>
+
+    <div class="form-popup" id="venueForm">
+      <div class="container">
+        <div class="form-field">
+          <label for="address">Address</label>
+          <input type="text" id="address" class="form-control" autofocus/>
+        </div>
+        <div class="form-field">
+          <label for="contact">Name</label>
+          <input type="text" id="cName" class="form-control" />
+        </div>
+        <div class="form-field">
+            <label for="contact">Email</label>
+            <input type="text" id="cEmail" class="form-control" />
+        </div>
+        <div class="form-field">
+            <label for="contact">Phone</label>
+            <input type="text" id="cPhone" class="form-control" />
+          </div>
+        <div class="form-field">
+          <label for="seats">Seats</label>
+          <input type="text" id="seats" class="form-control" />
+        </div>
+        <div class="row">
+          <div class="col-xs-12">
+            <button type="button" id="venueUpdateButton" class="btn btn-primary" onclick="venueUpdateClick();">
+              Add
+            </button>
+            <button type="button" id="venueCloseButton" class="btn btn-primary" onclick="venueFormClear();">
+              Back
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="/js/libs/jquery-3.3.1.js"></script>
+
+  <script src="/js/libs/bootstrap.min.js"></script>
+
+  <script src="/js/libs/moment.js"></script>
+
+  <script src="/js/libs/mustache.js"></script>
+
+  <script src="/js/libs/deparam.js"></script>
+
+  <script src="/js/database.js"></script>
+
+
+
+
+
+</body>
 
 </html>
 

@@ -9,3 +9,8 @@
     border: 3px solid #f1f1f1;
     z-index: 9;
   }
+
+  .scrolltable {
+    height: 10px;
+    overflow: auto;
+  }

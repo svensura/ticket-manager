@@ -1,10 +1,13 @@
 $(document).ready(function(){
+    formClear();
+    
     $("#but_submit").click(function(){
+        
         var username = $("#txt_uname").val().trim();
         var password = $("#txt_pwd").val().trim();
 
         if( username != "" && password != "" ){
-
+            console.log('Clikck', username, password)
             $.ajax({
                 "url": "http://127.0.0.1:3001/users/login",
                 "method": "POST",
@@ -47,6 +50,11 @@ $(document).ready(function(){
             // });
         
     });
+
+function formClear() {
+    $("#txt_uname").val("");
+    $("#txt_pwd").val("");
+    }
 
 // Handle exceptions from AJAX calls
 handleException = (request, message, error) => {

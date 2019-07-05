@@ -69,6 +69,13 @@
     width: 100%;
   }
   
+  .form-field-blue > * {
+    color: #fff;
+    background-color: #428bca;
+    border-color: #357ebd;
+    width: 100%;
+  }
+
   .form-field label {
     display: block;
     margin-bottom: 7px;
@@ -78,6 +85,7 @@
     border: 1px solid #e1e1e1;
     padding: 10px;
   }
+  
   
   .chat {
     display: flex;
