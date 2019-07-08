@@ -1,11 +1,13 @@
 $(document).ready(function () {
   usersList();
   venuesList();
+  gigsList();
 
   // take focus away
   document.addEventListener('click', function(e) { if(document.activeElement.toString() == '[object HTMLButtonElement]'){ document.activeElement.blur(); } });
 });
 
+// USER_FUNCTIONS
 // Get all Users to display
 usersList = () => {
 
@@ -263,18 +265,7 @@ function userUpdateInTable(user) {
   }
  }
 
-// Handle exceptions from AJAX calls
-handleException = (request, message, error) => {
-  var msg = "";
 
-  msg += "Code: " + request.status + "\n";
-  msg += "Text: " + request.statusText + "\n";
-  if (request.responseJSON != null) {
-    msg += "Message" + request.responseJSON.Message + "\n";
-  }
-
-  alert(msg);
-}
 
 // Clear form fields
 function userFormClear() {
@@ -294,6 +285,7 @@ function userCloseForm() {
   document.getElementById("userForm").style.display = "none";
 }
 
+// VENUE_FUNCTIONS
 // Get all Venues to display
 venuesList = () => {
 
@@ -351,6 +343,13 @@ function venueBuildTableRow(venue) {
         "<td>" + venue.address + "</td>" +
         "<td>" + venue.contact.name + "</td>" +
         "<td>" + venue.seats + "</td>" +
+        "<td>" + 
+        "<button type='button' " +
+          "class='btn btn-default' >" +
+          "<span class='" + 
+        ((venue.active) ? 'glyphicon glyphicon-thumbs-up' : 'glyphicon glyphicon-thumbs-down') + "' />" +
+         "</button>" +
+         "</td >" + 
         "<td>" +
         "<button type='button' " +
         "onclick='venueDelete(this);' " +
@@ -401,6 +400,7 @@ function venueToFields(venue) {
   $("#cEmail").val(venue.contact.email);
   $("#cPhone").val(venue.contact.phone);
   $("#seats").val(venue.seats);
+  $("#activeBox.checked").val(venue.active);
   venueOpenForm()
 }
 
@@ -416,6 +416,8 @@ function venueUpdateClick() {
       Venue.contact.email= $("#cEmail").val();
       Venue.contact.phone = $("#cPhone").val();
       Venue.seats = $("#seats").val();
+      Venue.active = $('#activeBox').is(':checked');
+      console.log('active:', Venue.active)
 
       if ($("#venueUpdateButton").text().trim() == "Add") {
         venueAdd(Venue);
@@ -434,6 +436,8 @@ function venueUpdate(venue) {
   data.address = venue.address
   data.contact = venue.contact
   data.seats = venue.seats
+  data.active = venue.active
+  
 
 
   // Call Web API to update venue
@@ -467,6 +471,7 @@ function venueAdd(venue) {
   data = new Object();
   data.address = venue.address
   data.contact = venue.contact
+  data.seats = venue.seats
   data.seats = venue.seats
 
 
@@ -548,19 +553,6 @@ function addClick() {
   }
  }
 
-// Handle exceptions from AJAX calls
-handleException = (request, message, error) => {
-  var msg = "";
-
-  msg += "Code: " + request.status + "\n";
-  msg += "Text: " + request.statusText + "\n";
-  if (request.responseJSON != null) {
-    msg += "Message" + request.responseJSON.Message + "\n";
-  }
-
-  alert(msg);
-}
-
 // Clear form fields
 function venueFormClear() {
   $("#address").val("");
@@ -568,6 +560,7 @@ function venueFormClear() {
   $("#cEmail").val("");
   $("#cPhone").val("");
   $("#seats").val("");
+  $("#activeBox").val("checked");
   
   venueCloseForm()
 }
@@ -581,7 +574,285 @@ function venueCloseForm() {
   document.getElementById("venueForm").style.display = "none";
 }
 
-// sort function
+
+// GIG_FUNCTIOONS
+// Get all Gigs to display
+gigsList = () => {
+
+  var token = window.localStorage.getItem('token');
+
+  $.ajax({
+    "url": 'http://127.0.0.1:3001/gigs',
+    "method": "GET",
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    success: function (gigs) {
+      console.log(gigs)
+      //gigs.sort(sort_by('address', false, function(a){return a.toUpperCase()}));
+      gigListSuccess(gigs);
+    },
+    error: function (request, message, error) {
+      handleException(request, message, error);
+    }
+  });
+}
+
+// Display all Gigs returned from Web API call
+gigListSuccess = (gigs) => {
+  // Iterate over the collection of data
+  $.each(gigs, (index, gig) => {
+    // Add a row to the Gigs table
+    gigAddRow(gig);
+  });
+}
+
+// Add Gig row to <table>
+gigAddRow = (gig) => {
+  // First check if a <tbody> tag exists, add one if not
+  if ($("#gigTable tbody").length == 0) {
+    $("#gigTable").append("<tbody></tbody>");
+  }
+
+  // Append row to <table>
+  $("#gigTable tbody").append(
+    gigBuildTableRow(gig));
+}
+
+// Build a <tr> for a row of table data
+function gigBuildTableRow(gig) {
+  var ret = "<tr>" +
+      "<td>" +
+        "<button type='button' " +
+          "onclick='gigGet(this);' " +
+          "class='btn btn-default' " +
+          "data-id='" + gig._id + "'>" +
+          "<span class='glyphicon glyphicon-edit' />"
+          + "</button>" +
+        "</td >" +
+        "<td>" + gig.houseNo + "</td>" +
+        "<td>" + gig.title + "</td>" +
+        "<td>" + gig.performer.name + "</td>" +
+        "<td>" + gig.venue.address + "</td>" +
+        "<td>" + (gig.startSeats - gig.soldSeats) + "</td>" +
+        "<td>" +
+        "<button type='button' " +
+        "onclick='gigDelete(this);' " +
+        "class='btn btn-default' " +
+        "data-id='" + gig._id + "'>" +
+        "<span class='glyphicon glyphicon-remove' />" +
+        "</button>" +
+      "</td>" +
+    "</tr>" 
+
+  return ret;
+}
+
+function gigGet(ctl) {
+
+  var token = window.localStorage.getItem('token');
+
+  // Get product id from data- attribute
+  var id = $(ctl).data("id");
+  console.log(id);
+  
+  // Store product id in hidden field
+  $("#storeid").val(id);
+
+  // Call Web API to get a Product
+  $.ajax({
+    "url": `http://127.0.0.1:3001/gigs/${id}`,
+    "method": "GET",
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    success: function (gig) {
+      gigToFields(gig);
+
+      // Change Update Button Text
+      $("#gigUpdateButton").text("Update");
+    },
+    error: function (request, message, error) {
+      handleException(request, message, error);
+    }
+  });
+}
+
+function gigToFields(gig) {
+  $("#address").val(gig.address);
+  $("#cName").val(gig.contact.name);
+  $("#cEmail").val(gig.contact.email);
+  $("#cPhone").val(gig.contact.phone);
+  $("#seats").val(gig.seats);
+  gigOpenForm()
+}
+
+// Handle click event on Update button
+function gigUpdateClick() {
+       // Build gig object from inputs
+      Gig = new Object();
+      Contact = new Object();
+      Gig._id = $("#storeid").val();
+      Gig.address = $("#address").val();
+      Gig.contact = Contact;
+      Gig.contact.name = $("#cName").val();
+      Gig.contact.email= $("#cEmail").val();
+      Gig.contact.phone = $("#cPhone").val();
+      Gig.seats = $("#seats").val();
+
+      if ($("#gigUpdateButton").text().trim() == "Add") {
+        gigAdd(Gig);
+      }
+      else {
+        gigUpdate(Gig);
+      }
+    }
+
+
+function gigUpdate(gig) {
+
+  var token = window.localStorage.getItem('token');
+
+  data = new Object();
+  data.address = gig.address
+  data.contact = gig.contact
+  data.seats = gig.seats
+
+  // Call Web API to update gig
+  $.ajax({
+    "url": `http://127.0.0.1:3001/gigs/${gig._id}`,
+    "method": "PATCH",
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+      },
+    "processData": false,
+    "data": `${JSON.stringify(data)}`
+    ,
+    success: function (gig) {
+    gigUpdateSuccess(gig);
+    },
+    error: function (request, message, error) {
+      handleException(request, message, error);
+    }
+  });
+}
+
+function gigUpdateSuccess(gig) {
+  gigUpdateInTable(gig);
+}
+
+function gigAdd(gig) {
+
+  var token = window.localStorage.getItem('token');
+
+  data = new Object();
+  data.address = gig.address
+  data.contact = gig.contact
+  data.seats = gig.seats
+
+
+  // Call Web API to add a new gig
+  $.ajax({
+    "url": `http://127.0.0.1:3001/gigs`,
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+      },
+    "processData": false,
+    "data": `${JSON.stringify(data)}`
+    ,
+    success: function (gig) {
+      gigAddSuccess(gig);
+    },
+    error: function (request, message, error) {
+      handleException(request, message, error);
+    }
+  });
+}
+
+function gigAddSuccess(gig) {
+  gigAddRow(gig);
+  gigFormClear();
+}
+
+// Update gig in <table>
+function gigUpdateInTable(gig) {
+  // Find Gig in <table>
+  var row = $("#gigTable button[data-id='" + gig._id + "']")
+            .parents("tr")[0];
+  // Add changed gig to table
+  $(row).after(gigBuildTableRow(gig));
+  // Remove original product
+  $(row).remove();
+
+  // Clear form fields
+  gigFormClear();
+
+  // Change Update Button Text
+  $("#gigUpdateButton").text("Add");
+}
+
+// Handle click event on Add button
+function addClick() {
+  console.log('addClick');
+  
+}
+
+
+ // Delete gig from <table>
+ function gigDelete(ctl) {
+  $(this).blur();
+  if (confirm("Are you sure ?")){
+    var token = window.localStorage.getItem('token');
+
+    var id = $(ctl).data("id");
+
+    // Call Web API to delete a gig
+    $.ajax({
+      "url": `http://127.0.0.1:3001/gigs/${id}`,
+      "method": "DELETE",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+        },
+      "processData": false,
+      "data": ''
+      ,
+      success: function (gig) {
+        $(ctl).parents("tr").remove();
+      },
+      error: function (request, message, error) {
+        handleException(request, message, error);
+      }
+    });
+  }
+ }
+
+// Clear form fields
+function gigFormClear() {
+  $("#address").val("");
+  $("#cName").val("");
+  $("#cEmail").val("");
+  $("#cPhone").val("");
+  $("#seats").val("");
+  
+  gigCloseForm()
+}
+
+function gigOpenForm() {
+  document.getElementById("gigForm").style.display = "block";
+  $("#address").focus()
+}
+
+function gigCloseForm() {
+  document.getElementById("gigForm").style.display = "none";
+}
+
+// alphabetical sort function
 var sort_by = function(field, reverse, primer){
 
   var key = primer ? 
@@ -593,4 +864,17 @@ var sort_by = function(field, reverse, primer){
   return function (a, b) {
       return a = key(a), b = key(b), reverse * ((a > b) - (b > a));
     } 
+}
+
+// Handle exceptions from AJAX calls
+handleException = (request, message, error) => {
+  var msg = "";
+
+  msg += "Code: " + request.status + "\n";
+  msg += "Text: " + request.statusText + "\n";
+  if (request.responseJSON != null) {
+    msg += "Message" + request.responseJSON.Message + "\n";
+  }
+
+  alert(msg);
 }

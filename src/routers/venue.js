@@ -1,19 +1,21 @@
 const express = require('express')
 const Venue = require('../models/venue')
+const auth = require('../middleware/auth')
+
 const router = new express.Router()
 
-router.post('/venues', async (req, res) => {
-    const task = new Venue(req.body)
+router.post('/venues', auth, async (req, res) => {
+    const venue = new Venue(req.body)
 
     try {
-        await task.save()
-        res.status(201).send(task)
+        await venue.save()
+        res.status(201).send(venue)
     } catch (e) {
         res.status(400).send(e)
     }
 })
 
-router.get('/venues', async (req, res) => {
+router.get('/venues', auth, async (req, res) => {
     try {
         const venues = await Venue.find({})
         res.send(venues)
@@ -22,7 +24,7 @@ router.get('/venues', async (req, res) => {
     }
 })
 
-router.get('/venues/:id', async (req, res) => {
+router.get('/venues/:id', auth, async (req, res) => {
     const _id = req.params.id
 
     try {
@@ -38,9 +40,9 @@ router.get('/venues/:id', async (req, res) => {
     }
 })
 
-router.patch('/venues/:id', async (req, res) => {
+router.patch('/venues/:id', auth, async (req, res) => {
     const updates = Object.keys(req.body)
-    const allowedUpdates = ['address', 'contact', 'seats']
+    const allowedUpdates = ['address', 'contact', 'seats', 'active']
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
 
     if (!isValidOperation) {
@@ -63,7 +65,7 @@ router.patch('/venues/:id', async (req, res) => {
     }
 })
 
-router.delete('/venues/:id', async (req, res) => {
+router.delete('/venues/:id', auth, async (req, res) => {
     try {
         const venue = await Venue.findByIdAndDelete(req.params.id)
 

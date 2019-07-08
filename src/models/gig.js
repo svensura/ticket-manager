@@ -1,14 +1,19 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
 
-const Venue = mongoose.model('Venue', {
+const Gig = mongoose.model('Gig', {
 
-    address: {
+    houseNo: {
+        type: Number,
+        unique: true,
+        required: true
+    },
+    title: {
         type: String,
         required: true,
         trim: true
     },
-    contact: {
+    performer: {
         name: {
             type: String,
             required: true,
@@ -35,14 +40,17 @@ const Venue = mongoose.model('Venue', {
             }
         }
     },
-    seats: {
-        type: Number,
-        required: true,
+    venue: {
+        type: mongoose.Schema.Types.ObjectId,
+        unique: true,
+        ref: 'Venue'
     },
-    active: {
-        type: Boolean,
-        default: true
-    }
+    startSeats: {
+        type: Number,
+    },
+    soldSeats: {
+        type: Number,
+    },
 })
 
-module.exports = Venue
+module.exports = Gig

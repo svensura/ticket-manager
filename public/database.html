@@ -98,6 +98,7 @@
               <th>Address</th>
               <th>Contact</th>
               <th>Seats</th>
+              <th>Active</th>
               <th>Delete</th>
             </tr>
           </thead>
@@ -127,6 +128,10 @@
           <label for="seats">Seats</label>
           <input type="text" id="seats" class="form-control" />
         </div>
+        <div class="form-field">
+          <label for="active">Active</label>
+          <input type="checkbox" id="activeBox" class="form-control" />
+        </div>
         <div class="row">
           <div class="col-xs-12">
             <button type="button" id="venueUpdateButton" class="btn btn-primary" onclick="venueUpdateClick();">
@@ -141,6 +146,76 @@
     </div>
   </div>
 
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-6">
+        <h2>Gigs</h2>
+      </div>
+      <div class="col-xs-12">
+        <button type="button" class="btn btn-primary" onclick="gigOpenForm();">
+          Add
+        </button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-6">
+        <table id="gigTable" class="table table-bordered
+                    table-condensed table-striped">
+          <thead>
+            <tr>
+              <th>Edit</th>
+              <th>Number</th>
+              <th>Title</th>
+              <th>Performer</th>
+              <th>Venue</th>
+              <th>Tickets Left</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+    </div>
+
+    <div class="form-popup" id="gigForm">
+      <div class="container">
+        <div class="form-field">
+          <label for="address">No.</label>
+          <input type="text" id="houseNo" class="form-control" autofocus/>
+        </div>
+        <div class="form-field">
+          <label for="contact">Title</label>
+          <input type="text" id="title" class="form-control" />
+        </div>
+        <div class="form-field">
+            <label for="contact">Performer</label>
+            <input type="text" id="performer" class="form-control" />
+        </div>
+        <div class="form-field">
+            <label for="contact">Venue</label>
+            <input type="text" id="vAddress" class="form-control" />
+          </div>
+        <div class="form-field">
+          <label for="seats">Seats</label>
+          <input type="text" id="sSeats" class="form-control" />
+        </div>
+        <div class="form-field">
+          <label for="seats">Sold</label>
+          <input type="text" id="sold" class="form-control" />
+        </div>
+        <div class="row">
+          <div class="col-xs-12">
+            <button type="button" id="gigUpdateButton" class="btn btn-primary" onclick="gigUpdateClick();">
+              Add
+            </button>
+            <button type="button" id="gigCloseButton" class="btn btn-primary" onclick="gigFormClear();">
+              Back
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="/js/libs/jquery-3.3.1.js"></script>
 
