@@ -80,11 +80,11 @@ function userGet(ctl) {
 
   var token = window.localStorage.getItem('token');
 
-  // Get product id from data- attribute
+  // Get user id from data- attribute
   var id = $(ctl).data("id");
   console.log(id);
   
-  // Store product id in hidden field
+  // Store user id in hidden field
   $("#storeid").val(id);
 
   // Call Web API to get a Product

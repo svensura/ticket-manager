@@ -21,78 +21,85 @@
       </div>
       <ul class="nav navbar-nav">
         <li><a href="dashboard.html">Dashboard</a></li>
-        <li class="active"><a href="users.html">Users</a></li>
+        <li><a href="users.html">Users</a></li>
         <li><a href="venues.html">Venues</a></li>
         <li><a href="gigs.html">Gigs</a></li>
-        <li><a href="sale.html">Ticketsale</a></li>
+        <li class="active"><a href="sale.html">Ticketsale</a></li>
         <li class="pointer"><a onclick="logoutClicked()" >Logout</a></li>
       </ul>
     </div>
   </nav>
  
+  
+
   <div class="container">
     <div class="row">
       <div class="col-sm-6">
-        <h2>Users</h2>
+        <h2>Ticketsale</h2>
       </div>
-      <div class="col-xs-12">
-        <button type="button" class="btn btn-primary" onclick="userOpenForm();">
-          Add
-        </button>
-      </div>
+
     </div>
 
     <div class="row">
       <div class="col-sm-6">
-        <table id="userTable" class="table table-bordered
-              table-condensed table-striped">
+        <table id="gigTable" class="table table-bordered
+                    table-condensed table-striped">
           <thead>
             <tr>
-              <th>Edit</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Delete</th>
+              <th>Number</th>
+              <th>Title</th>
+              <th>Performer</th>
+              <th>Venue</th>
+              <th>Tickets Left</th>
+              <th>Buy</th>
+              <th>Refund</th>
             </tr>
           </thead>
         </table>
       </div>
     </div>
 
-    <div class="form-popup" id="userForm">
+    <div class="form-popup" id="saleForm">
       <div class="container">
-        <div class="form-field">
-          <label for="username">Name</label>
-          <input type="text" id="username" class="form-control" autofocus/>
-        </div>
-        <div class="form-field">
-          <label for="email">Email</label>
-          <input type="text" id="email" class="form-control" />
-        </div>
-        <div class="form-field">
-          <label for="phone">Phone</label>
-          <input type="text" id="phone" class="form-control" />
-        </div>
-        <div class="form-field">
-          <label for="password">Password</label>
-          <input type="password" id="password" class="form-control" />
+        <h2>
+          Tickets for House No. <a id="houseNo"></a> 
+        </h2>
+        <h2>
+          <a id="title"></a>
+        </h2>
+        <h2>
+          performed by
+        </h2>
+        <h2>
+          <a id="gName"></a> 
+        </h2>
+
+        <div>
+            <label for="sel1">Choose amount</label>
+            <select class="form-control" id="amount">
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+              <option>6</option>
+              <option>7</option>
+              <option>8</option>
+            </select>
         </div>
         <div class="row">
           <div class="col-xs-12">
-            <button type="button" id="userUpdateButton" class="btn btn-primary" onclick="userUpdateClick();">
-              Add
+            <button type="button" id="gigUpdateButton" class="btn btn-primary" onclick="buyClick();">
+              Buy
             </button>
-            <button type="button" id="userCloseButton" class="btn btn-primary" onclick="userFormClear();">
-              Back
+            <button type="button" id="userCloseButton" class="btn btn-primary" onclick="saleFormClear();">
+                Back
             </button>
           </div>
         </div>
       </div>
     </div>
   </div>
-
-
-
 
   <script src="/js/libs/jquery-3.3.1.js"></script>
 
@@ -104,10 +111,9 @@
 
   <script src="/js/libs/deparam.js"></script>
 
-  <script src="/js/users.js"></script>
+  <script src="/js/sale.js"></script>
 
   <script src="/js/commonFunctions.js"></script>
-
 
 
 

@@ -32,32 +32,37 @@ router.get('/gigs', auth, async (req, res) => {
     }
 })
 
-// router.get('/gigs', auth, async (req, res) => {
-//     console.log('getGigs')
-//     try {
-//         const collectGigData = async () => {
-//             const gigs = await Gig.find({})
-
-//             const popGigs = async (gigs) => { 
-//                 await gigs.forEach( async (gig) => {
-//                     console.log('ID', gig.venue)  
-//                     await gig.populate('venue').execPopulate()
-//                     console.log('Venue and Address', gig)
-//             })
-//             popGigs(gigs).then((result => {
-//                 return result
-//             }))
-// 8       }
-//     } catch (e) {
-//         res.status(500).send()
-//     }
-// })
 
 router.get('/gigs/:id', auth, async (req, res) => {
     const _id = req.params.id
 
     try {
         const gig = await Gig.findById(_id)
+
+        if (!gig) {
+            return res.status(404).send()
+        }
+
+        res.send(gig)
+    } catch (e) {
+        res.status(500).send()
+    }
+})
+
+router.patch('/gigs_buy/:id', auth, async (req, res) => {
+    const _id = req.params.id
+    
+    try {
+        const gig = await Gig.findById(_id)
+
+        if (!gig || (gig.startSeats - gig.soldSeats - parseInt(req.body.amount) <= 0)) {
+            return res.status(404).send()
+        }
+        console.log('Vorher: ', gig.startSeats - gig.soldSeats)
+        console.log('abzuziehen: ',parseInt(req.body.amount))
+        gig['soldSeats'] += parseInt(req.body.amount)
+        console.log('Nachher: ', gig.startSeats - gig.soldSeats)
+        await gig.save()
 
         if (!gig) {
             return res.status(404).send()
@@ -90,7 +95,15 @@ router.patch('/gigs/:id', auth, async (req, res) => {
                 gig[update] = req.body[update]
             }
         })
+        const venue = await Venue.findById(req.body.venue)
+        const seats = venue.seats
+        if (seats > 0) {
+            gig.startSeats = seats
+        } else {
+            return res.status(400).send({ error: 'No seats available!' })
+        }
         await gig.save()
+        
 
         if (!gig) {
             return res.status(404).send()

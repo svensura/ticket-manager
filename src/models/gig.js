@@ -31,7 +31,6 @@ const Gig = mongoose.model('Gig', {
     },
     venue: {
         type: mongoose.Schema.Types.ObjectId,
-        unique: true,
         ref: 'Venue'
     },
     startSeats: {

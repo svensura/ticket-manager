@@ -86,13 +86,13 @@ function gigGet(ctl) {
 
   var token = window.localStorage.getItem('token');
 
-  // Get product id from  first part of data- attribute (Split-operator = /)
+  // Get gig id from  first part of data- attribute (Split-operator = /)
   var id = $(ctl).data("id").split("/")[0];
 
   // Get address from  second part of data- attribute (Split-operator = /)
   var workingAddress = $(ctl).data("id").split("/")[1];
   
-  // Store product id in hidden field
+  // Store gig id in hidden field
   $("#storeid").val(id);
 
   // Call Web API to get a Gig
@@ -127,21 +127,6 @@ function gigGet(ctl) {
 
 }
 
-function arrayToSelect(array, values, selectId, match) {
-  var hasFound = false
-  $("#" + selectId).empty()
-  $.each(array, function(index, text) {
-    if (text == match){
-      $("#" + selectId).append( $('<option selected="selected"></option>').val(values[index]).html(text) )
-      hasFound = 'true'
-    } else {
-      $("#" + selectId).append( $('<option></option>').val(values[index]).html(text) )
-    }
-  });
-  if (hasFound == false && match) {
-    $("#" + selectId).append( $('<option selected="selected"></option>').html(match + ' -- NOT ACTIVE!') )
-  }
-}
 
 // Call Web API to get a List of active Venues
 function addressesToForm(workingAddress) {
@@ -172,6 +157,22 @@ function addressesToForm(workingAddress) {
     }
   });
 } 
+
+function arrayToSelect(array, values, selectId, match) {
+  var hasFound = false
+  $("#" + selectId).empty()
+  $.each(array, function(index, text) {
+    if (text == match){
+      $("#" + selectId).append( $('<option selected="selected"></option>').val(values[index]).html(text) )
+      hasFound = 'true'
+    } else {
+      $("#" + selectId).append( $('<option></option>').val(values[index]).html(text) )
+    }
+  });
+  if (hasFound == false && match) {
+    $("#" + selectId).append( $('<option selected="selected"></option>').html(match + ' -- NOT ACTIVE!') )
+  }
+}
 
 // Handle click event on Update button
 function gigUpdateClick() {
@@ -239,9 +240,7 @@ function gigUpdateSuccess(gig) {
 
 function gigAdd(gig) {
 
-  console.log('gig: ', gig)
-    
-  var token = window.localStorage.getItem('token');
+ var token = window.localStorage.getItem('token');
 
   data = new Object();
   data.houseNo = gig.houseNo
@@ -249,8 +248,6 @@ function gigAdd(gig) {
   data.performer = gig.performer
   data.venue = gig.venue
 
-
-  console.log('data: ', data)
 
   // Call Web API to add a new gig
   $.ajax({

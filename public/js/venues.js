@@ -89,11 +89,11 @@ function venueGet(ctl) {
 
   var token = window.localStorage.getItem('token');
 
-  // Get product id from data- attribute
+  // Get venue id from data- attribute
   var id = $(ctl).data("id");
   console.log(id);
   
-  // Store product id in hidden field
+  // Store venue id in hidden field
   $("#storeid").val(id);
 
   // Call Web API to get a Venuet
