@@ -1,11 +1,21 @@
 const express = require('express')
+const mongoose = require('mongoose')
 const Gig = require('../models/gig')
+const Venue = require('../models/venue')
 const auth = require('../middleware/auth')
 const router = new express.Router()
 
 router.post('/gigs', auth, async (req, res) => {
     const gig = new Gig(req.body)
-    try {
+    const venue = await Venue.findById(req.body.venue)
+    const seats = venue.seats
+    if (seats > 0) {
+        gig.startSeats = seats
+    } else {
+        return res.status(400).send({ error: 'No seats available!' })
+    }
+     
+   try {
         await gig.save()
         res.status(201).send(gig)
     } catch (e) {
@@ -71,7 +81,15 @@ router.patch('/gigs/:id', auth, async (req, res) => {
     try {
         const gig = await Gig.findById(req.params.id)
 
-        updates.forEach((update) => gig[update] = req.body[update])
+        updates.forEach((update) => {
+            // to catch an venue update coming as string must be an ID
+            if(update == "venue") {
+                 gig[update] = mongoose.Types.ObjectId(req.body[update])
+            } else 
+            {
+                gig[update] = req.body[update]
+            }
+        })
         await gig.save()
 
         if (!gig) {

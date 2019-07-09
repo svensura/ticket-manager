@@ -21,23 +21,12 @@ const Gig = mongoose.model('Gig', {
         },
         phone: {
             type: String,
-            required: true,
-            default: 0,
-            validate(value) {
-                if (value.length > 20) {
-                    throw new Error('Too long')
-                }
-            }
+            trim: true,
         },
         email: {
             type: String,
             trim: true,
-            lowercase: true,
-            validate(value) {
-                if (!validator.isEmail(value)) {
-                    throw new Error('Email is invalid')
-                }
-            }
+
         }
     },
     venue: {
@@ -50,6 +39,7 @@ const Gig = mongoose.model('Gig', {
     },
     soldSeats: {
         type: Number,
+        default: 0
     },
 })
 

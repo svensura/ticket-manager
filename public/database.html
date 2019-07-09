@@ -4,7 +4,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Database</title>
+  <title>Literaturnacht</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" , user-scalable=no">
   <link rel="stylesheet" href="/css/bootstrap.min.css">
   <link rel="stylesheet" href="/css/popup.css">
@@ -13,6 +13,21 @@
 
 <body>
   <input type="hidden" id="storeid" value="0" />
+  
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#">Große Kiesau Literaturnacht</a>
+      </div>
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">Dashboard</a></li>
+        <li><a href="users.html">Users</a></li>
+        <li><a href="venues.html">Venues</a></li>
+        <li><a href="gigs.html">Gigs</a></li>
+        <li><a href="logout.html">Logout</a></li>
+      </ul>
+    </div>
+  </nav>
  
   <div class="container">
     <div class="row">
@@ -180,28 +195,33 @@
     <div class="form-popup" id="gigForm">
       <div class="container">
         <div class="form-field">
-          <label for="address">No.</label>
+          <label for="houseNo">No.</label>
           <input type="text" id="houseNo" class="form-control" autofocus/>
         </div>
         <div class="form-field">
-          <label for="contact">Title</label>
+          <label for="titlet">Title</label>
           <input type="text" id="title" class="form-control" />
         </div>
         <div class="form-field">
-            <label for="contact">Performer</label>
-            <input type="text" id="performer" class="form-control" />
+            <label for="gName">Performer</label>
+            <input type="text" id="gName" class="form-control" />
         </div>
         <div class="form-field">
-            <label for="contact">Venue</label>
-            <input type="text" id="vAddress" class="form-control" />
-          </div>
+          <label for="gEmail">Email</label>
+          <input type="text" id="gEmail" class="form-control" />
+        </div>
         <div class="form-field">
-          <label for="seats">Seats</label>
+          <label for="gPhone">Phone</label>
+          <input type="text" id="gPhone" class="form-control" />
+        </div>
+        <div class="form-field">
+          <label for="gAddress">Venue</label>
+          <select id="gAddress" class="form-control" >
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="sSeats">Total Seats</label>
           <input type="text" id="sSeats" class="form-control" />
-        </div>
-        <div class="form-field">
-          <label for="seats">Sold</label>
-          <input type="text" id="sold" class="form-control" />
         </div>
         <div class="row">
           <div class="col-xs-12">

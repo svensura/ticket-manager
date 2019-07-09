@@ -21,7 +21,7 @@ $(document).ready(function(){
                     if (response.token) {
                         console.log(response.token)
                         window.localStorage.setItem('token', response.token)
-                        window.location = "database.html"
+                        window.location = "dashboard.html"
                     } else {
                         window.alert("Wrong email or password")
                     }    

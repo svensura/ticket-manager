@@ -43,7 +43,7 @@ userListSuccess = (users) => {
 userAddRow = (user) => {
   // First check if a <tbody> tag exists, add one if not
   if ($("#userTable tbody").length == 0) {
-    $("#userTable").append("<tbody class='scrolltable'></tbody>");
+    $("#userTable").append("<tbody></tbody>");
   }
 
   // Append row to <table>
@@ -119,18 +119,18 @@ function userToFields(user) {
 // Handle click event on Update button
 function userUpdateClick() {
       // Build user object from inputs
-      User = new Object();
-      User._id = $("#storeid").val();
-      User.name = $("#username").val();
-      User.email = $("#email").val();
-      User.phone = $("#phone").val();
-      User.password = $("#password").val();
+      user = new Object();
+      user._id = $("#storeid").val();
+      user.name = $("#username").val();
+      user.email = $("#email").val();
+      user.phone = $("#phone").val();
+      user.password = $("#password").val();
 
       if ($("#userUpdateButton").text().trim() == "Add") {
-        userAdd(User);
+        userAdd(user);
       }
       else {
-        userUpdate(User);
+        userUpdate(u^ser);
       }
     }
 
@@ -344,8 +344,8 @@ function venueBuildTableRow(venue) {
         "<td>" + venue.contact.name + "</td>" +
         "<td>" + venue.seats + "</td>" +
         "<td>" + 
-        "<button type='button' " +
-          "class='btn btn-default' >" +
+        "<button type='button' disbabled " +
+          "class='btn btn-default' disabled = 'disabled'>" +
           "<span class='" + 
         ((venue.active) ? 'glyphicon glyphicon-thumbs-up' : 'glyphicon glyphicon-thumbs-down') + "' />" +
          "</button>" +
@@ -374,7 +374,7 @@ function venueGet(ctl) {
   // Store product id in hidden field
   $("#storeid").val(id);
 
-  // Call Web API to get a Product
+  // Call Web API to get a Venuet
   $.ajax({
     "url": `http://127.0.0.1:3001/venues/${id}`,
     "method": "GET",
@@ -400,30 +400,30 @@ function venueToFields(venue) {
   $("#cEmail").val(venue.contact.email);
   $("#cPhone").val(venue.contact.phone);
   $("#seats").val(venue.seats);
-  $("#activeBox.checked").val(venue.active);
-  venueOpenForm()
+  $("#activeBox").prop('checked', (venue.active));
+ venueOpenForm()
 }
 
 // Handle click event on Update button
 function venueUpdateClick() {
        // Build venue object from inputs
-      Venue = new Object();
-      Contact = new Object();
-      Venue._id = $("#storeid").val();
-      Venue.address = $("#address").val();
-      Venue.contact = Contact;
-      Venue.contact.name = $("#cName").val();
-      Venue.contact.email= $("#cEmail").val();
-      Venue.contact.phone = $("#cPhone").val();
-      Venue.seats = $("#seats").val();
-      Venue.active = $('#activeBox').is(':checked');
-      console.log('active:', Venue.active)
+      venue = new Object();
+      contact = new Object();
+      venue._id = $("#storeid").val();
+      venue.address = $("#address").val();
+      venue.contact = contact;
+      venue.contact.name = $("#cName").val();
+      venue.contact.email= $("#cEmail").val();
+      venue.contact.phone = $("#cPhone").val();
+      venue.seats = $("#seats").val();
+      venue.active = $('#activeBox').prop('checked');
+      console.log('active:', venue.active)
 
       if ($("#venueUpdateButton").text().trim() == "Add") {
-        venueAdd(Venue);
+        venueAdd(venue);
       }
       else {
-        venueUpdate(Venue);
+        venueUpdate(venue);
       }
     }
 
@@ -560,7 +560,7 @@ function venueFormClear() {
   $("#cEmail").val("");
   $("#cPhone").val("");
   $("#seats").val("");
-  $("#activeBox").val("checked");
+  $("#activeBox").prop('checked', true);
   
   venueCloseForm()
 }
@@ -627,7 +627,7 @@ function gigBuildTableRow(gig) {
         "<button type='button' " +
           "onclick='gigGet(this);' " +
           "class='btn btn-default' " +
-          "data-id='" + gig._id + "'>" +
+          "data-id='" + gig._id + "/" + gig.venue.address + "'>" +
           "<span class='glyphicon glyphicon-edit' />"
           + "</button>" +
         "</td >" +
@@ -653,14 +653,16 @@ function gigGet(ctl) {
 
   var token = window.localStorage.getItem('token');
 
-  // Get product id from data- attribute
-  var id = $(ctl).data("id");
-  console.log(id);
+  // Get product id from  first part of data- attribute (Split-operator = /)
+  var id = $(ctl).data("id").split("/")[0];
+
+  // Get address from  second part of data- attribute (Split-operator = /)
+  var workingAddress = $(ctl).data("id").split("/")[1];
   
   // Store product id in hidden field
   $("#storeid").val(id);
 
-  // Call Web API to get a Product
+  // Call Web API to get a Gig
   $.ajax({
     "url": `http://127.0.0.1:3001/gigs/${id}`,
     "method": "GET",
@@ -678,35 +680,86 @@ function gigGet(ctl) {
       handleException(request, message, error);
     }
   });
+
+  function gigToFields(gig) {
+    $("#houseNo").val(gig.houseNo);
+    $("#title").val(gig.title);
+    $("#gName").val(gig.performer.name);
+    $("#gEmail").val(gig.performer.email);
+    $("#gPhone").val(gig.performer.phone);
+    $("#sSeats").val(gig.startSeats);
+    gigOpenForm()
+  }
+
+  // Call Web API to get a List of active Venues
+  $.ajax({
+    "url": `http://127.0.0.1:3001/venues`,
+    "method": "GET",
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    success: function (venuesActive) {
+      venuesActive.sort(sort_by('address', false, function(a){return a.toUpperCase()}));
+      var addresses = []
+      var venueIds = []
+      venuesActive.forEach(function (venue) {
+        if(venue.active){        
+          addresses.push(venue.address)
+          venueIds.push(venue._id)
+        }
+      })
+      arrayToSelect(addresses, venueIds, 'gAddress', workingAddress);
+    },
+    error: function (request, message, error) {
+      handleException(request, message, error);
+    }
+  });
 }
 
-function gigToFields(gig) {
-  $("#address").val(gig.address);
-  $("#cName").val(gig.contact.name);
-  $("#cEmail").val(gig.contact.email);
-  $("#cPhone").val(gig.contact.phone);
-  $("#seats").val(gig.seats);
-  gigOpenForm()
+function arrayToSelect(array, values, selectId, match) {
+  var hasFound = false
+  $.each(array, function(index, text) {
+    if (text == match){
+      $("#" + selectId).append( $('<option selected="selected"></option>').val(values[index]).html(text) )
+      hasFound = 'true'
+    } else {
+      $("#" + selectId).append( $('<option></option>').val(values[index]).html(text) )
+    }
+  });
+  if (hasFound == false) {
+    $("#" + selectId).append( $('<option selected="selected"></option>').html(match + ' -- NOT ACTIVE!') )
+  }
+  console.log(hasFound)
 }
+
+
 
 // Handle click event on Update button
 function gigUpdateClick() {
        // Build gig object from inputs
-      Gig = new Object();
-      Contact = new Object();
-      Gig._id = $("#storeid").val();
-      Gig.address = $("#address").val();
-      Gig.contact = Contact;
-      Gig.contact.name = $("#cName").val();
-      Gig.contact.email= $("#cEmail").val();
-      Gig.contact.phone = $("#cPhone").val();
-      Gig.seats = $("#seats").val();
+      gig = new Object();
+      performer = new Object();
+      // venue = new Object();
+      gig._id = $("#storeid").val().split("/")[0];;
+      gig.houseNo = $("#houseNo").val();
+      gig.title = $("#title").val();
+      gig.performer = performer;
+      gig.performer.name = $("#gName").val();
+      gig.performer.email= $("#gEmail").val();
+      gig.performer.phone = $("#gPhone").val();
+      gig.venue = $("#gAddress").val()
+      console.log($("#gAddress").val())
+      // gig.venue.address = $("#gAddress option:selected").text()
+      // console.log($("#gAddress option:selected").text())
+      gig.startSeats = $("#sSeats").val();
+      
 
       if ($("#gigUpdateButton").text().trim() == "Add") {
-        gigAdd(Gig);
+        gigAdd(gig);
       }
       else {
-        gigUpdate(Gig);
+        gigUpdate(gig);
       }
     }
 
@@ -716,9 +769,11 @@ function gigUpdate(gig) {
   var token = window.localStorage.getItem('token');
 
   data = new Object();
-  data.address = gig.address
-  data.contact = gig.contact
-  data.seats = gig.seats
+  data.houseNo = gig.houseNo
+  data.title = gig.title
+  data.performer = gig.performer
+  data.venue = gig.venue
+  data.startSeats = gig.startSeats
 
   // Call Web API to update gig
   $.ajax({
@@ -732,6 +787,7 @@ function gigUpdate(gig) {
     "data": `${JSON.stringify(data)}`
     ,
     success: function (gig) {
+    console.log(gig)
     gigUpdateSuccess(gig);
     },
     error: function (request, message, error) {
@@ -741,6 +797,13 @@ function gigUpdate(gig) {
 }
 
 function gigUpdateSuccess(gig) {
+
+  console.log('STREET', $("#gAddress option:selected").text())
+  venue = new Object
+  venue.address = $("#gAddress option:selected").text() 
+  delete gig.venue
+  gig.venue = venue
+  console.log('GIG: ',gig)
   gigUpdateInTable(gig);
 }
 
@@ -749,10 +812,11 @@ function gigAdd(gig) {
   var token = window.localStorage.getItem('token');
 
   data = new Object();
-  data.address = gig.address
-  data.contact = gig.contact
-  data.seats = gig.seats
-
+  data.houseNo = gig.house
+  data.title = gig.title
+  data.performer = gig.peformer
+  data.venue = gig.venue
+  data.startSeats = gig.startSeats
 
   // Call Web API to add a new gig
   $.ajax({
@@ -786,7 +850,7 @@ function gigUpdateInTable(gig) {
             .parents("tr")[0];
   // Add changed gig to table
   $(row).after(gigBuildTableRow(gig));
-  // Remove original product
+  // Remove original gig
   $(row).remove();
 
   // Clear form fields
@@ -834,18 +898,19 @@ function addClick() {
 
 // Clear form fields
 function gigFormClear() {
-  $("#address").val("");
-  $("#cName").val("");
-  $("#cEmail").val("");
-  $("#cPhone").val("");
-  $("#seats").val("");
-  
+  $("#houseNo").val("");
+  $("#title").val("");
+  $("#gName").val("");
+  $("#gEmail").val("");
+  $("#gPhone").val("");
+  $("#gAddress").empty();
+  $("#sSeats").val("");
   gigCloseForm()
 }
 
 function gigOpenForm() {
   document.getElementById("gigForm").style.display = "block";
-  $("#address").focus()
+  $("#title").focus()
 }
 
 function gigCloseForm() {

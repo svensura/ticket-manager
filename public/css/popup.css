@@ -17,5 +17,9 @@
 
   tr.header
 {
-    cursor:pointer;
+  cursor: pointer;
+}
+
+li.pointer {
+  cursor: pointer
 }
