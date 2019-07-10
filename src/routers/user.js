@@ -3,7 +3,7 @@ const User = require('../models/user')
 const auth = require('../middleware/auth')
 const router = new express.Router()
 
-router.post('/users', async (req, res) => {
+router.post('/users', (req, res) => {
     const user = new User(req.body)
     console.log(req.body)
     try {
