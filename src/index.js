@@ -7,7 +7,7 @@ const venueRouter = require('./routers/venue')
 const gigRouter = require('./routers/gig')
 
 const app = express()
-const port = process.env.PORT || 3001
+const port = process.env.PORT
 
 // app.use((req, res, next) => {
 //     if (req.method === 'GET') {

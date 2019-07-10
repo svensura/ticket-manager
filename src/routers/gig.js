@@ -58,10 +58,7 @@ router.patch('/gigs_buy/:id', auth, async (req, res) => {
         if (!gig || (gig.startSeats - gig.soldSeats - parseInt(req.body.amount) <= 0)) {
             return res.status(404).send()
         }
-        console.log('Vorher: ', gig.startSeats - gig.soldSeats)
-        console.log('abzuziehen: ',parseInt(req.body.amount))
         gig['soldSeats'] += parseInt(req.body.amount)
-        console.log('Nachher: ', gig.startSeats - gig.soldSeats)
         await gig.save()
 
         if (!gig) {
