@@ -3,6 +3,7 @@ const mongoose = require('mongoose')
 const Gig = require('../models/gig')
 const Venue = require('../models/venue')
 const auth = require('../middleware/auth')
+const actionLog = require('../helper/actionLog')
 const router = new express.Router()
 
 router.post('/gigs', auth, async (req, res) => {
@@ -17,6 +18,7 @@ router.post('/gigs', auth, async (req, res) => {
      
    try {
         await gig.save()
+        actionLog('Gig created', req.headers.authorization, gig)
         res.status(201).send(gig)
     } catch (e) {
         res.status(400).send(e)
@@ -60,7 +62,7 @@ router.patch('/gigs_buy/:id', auth, async (req, res) => {
         }
         gig['soldSeats'] += parseInt(req.body.amount)
         await gig.save()
-
+        actionLog(`${req.body.amount} Tickets bought/refunded`, req.headers.authorization, gig)
         if (!gig) {
             return res.status(404).send()
         }
@@ -100,7 +102,7 @@ router.patch('/gigs/:id', auth, async (req, res) => {
             return res.status(400).send({ error: 'No seats available!' })
         }
         await gig.save()
-        
+        actionLog('Gig edited', req.headers.authorization, gig)
 
         if (!gig) {
             return res.status(404).send()
@@ -115,7 +117,7 @@ router.patch('/gigs/:id', auth, async (req, res) => {
 router.delete('/gigs/:id', auth, async (req, res) => {
     try {
         const gig = await Gig.findByIdAndDelete(req.params.id)
-
+        actionLog('Gig deleted', req.headers.authorization, gig)
         if (!gig) {
             res.status(404).send()
         }

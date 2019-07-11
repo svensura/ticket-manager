@@ -1,13 +1,15 @@
 const express = require('express')
 const User = require('../models/user')
 const auth = require('../middleware/auth')
+const actionLog = require('../helper/actionLog')
+const jwt = require('jsonwebtoken')
 const router = new express.Router()
 
 router.post('/users', auth, async (req, res) => {
     const user = new User(req.body)
-    console.log(req.body)
     try {
         await user.save()
+        actionLog('User created', req.headers.authorization, user)
         const token = await user.generateAuthToken()
         res.status(201).send({ user, token })
     } catch (e) {
@@ -73,6 +75,7 @@ router.patch('/users/me', auth, async (req, res) => {
     try {
         updates.forEach((update) => req.user[update] = req.body[update])
         await req.user.save()
+        actionLog('User edited', req.headers.authorization, user)
         res.send(req.user)
     } catch (e) {
         res.status(400).send(e)
@@ -81,7 +84,8 @@ router.patch('/users/me', auth, async (req, res) => {
 
 router.delete('/users/me', auth, async (req, res) => {
     try {
-        await req.user.remove() 
+        await req.user.remove()
+        actionLog('User deleted', req.headers.authorization, user)
         res.send(req.user)
     } catch (e) {
         res.status(500).send()
@@ -117,6 +121,7 @@ router.patch('/users/:id', auth, async (req, res) => {
         const user = await User.findById(req.params.id)
 
         updates.forEach((update) => user[update] = req.body[update])
+        actionLog('User edited', req.headers.authorization, user)
         await user.save()
 
         if (!user) {
@@ -132,6 +137,8 @@ router.patch('/users/:id', auth, async (req, res) => {
 router.delete('/users/:id', auth, async (req, res) => {
     try {
         const user = await User.findByIdAndDelete(req.params.id)
+
+        actionLog('All users deleted', req.headers.authorization, user)
 
         if (!user) {
             res.status(404).send()
