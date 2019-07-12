@@ -13,7 +13,6 @@ const actionLog = async (keyword, authorization, JSONcontent) => {
         logEntry.creator = creator
         logEntry.content = JSON.stringify(JSONcontent)
 
-        console.log(`${keyword} by ${creator.name} ${JSON.stringify(JSONcontent)}`)
         try {
             await logEntry.save()
         } catch (e) {

@@ -4,6 +4,7 @@ const Gig = require('../models/gig')
 const Venue = require('../models/venue')
 const auth = require('../middleware/auth')
 const actionLog = require('../helper/actionLog')
+const mailSend = require('../helper/mailSend')
 const router = new express.Router()
 
 router.post('/gigs', auth, async (req, res) => {
@@ -53,19 +54,24 @@ router.get('/gigs/:id', auth, async (req, res) => {
 
 router.patch('/gigs_buy/:id', auth, async (req, res) => {
     const _id = req.params.id
-    
-    try {
+   try {
         const gig = await Gig.findById(_id)
 
-        if (!gig || (gig.startSeats - gig.soldSeats - parseInt(req.body.amount) <= 0)) {
-            return res.status(404).send()
+        if (!gig || (gig.startSeats - gig.soldSeats - parseInt(req.body.amount) < 0)) {
+            return res.status(406).send()
         }
+        console.log('GIG: ',gig)
+        const venue = await Venue.findById(gig.venue)
+        console.log('VENUE: ',venue)
         gig['soldSeats'] += parseInt(req.body.amount)
         await gig.save()
         actionLog(`${req.body.amount} Tickets bought/refunded`, req.headers.authorization, gig)
         if (!gig) {
             return res.status(404).send()
         }
+        if (gig.startSeats - gig.soldSeats == 0) {
+            mailSend(venue.contact.email, 'Fully Booked', `Hi ${venue.contact.name}, the Grosse-Kiesau-Literaturnacht-gig "${gig.title}" is fully booked!`)
+       }
 
         res.send(gig)
     } catch (e) {
