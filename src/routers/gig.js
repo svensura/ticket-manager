@@ -36,6 +36,7 @@ router.get('/gigs', auth, async (req, res) => {
 })
 
 
+
 router.get('/gigs/:id', auth, async (req, res) => {
     const _id = req.params.id
 
