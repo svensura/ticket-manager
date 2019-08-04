@@ -58,7 +58,7 @@ router.patch('/gigs_buy/:id', auth, async (req, res) => {
         const gig = await Gig.findById(_id)
 
         if (!gig || (gig.startSeats - gig.soldSeats - parseInt(req.body.amount) < 0)) {
-            return res.status(406).send()
+            return res.status(406).send({ error: 'No or not enough tickets available' })
         }
         console.log('GIG: ',gig)
         const venue = await Venue.findById(gig.venue)
