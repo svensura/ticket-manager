@@ -5,7 +5,16 @@ const Venue = require('../models/venue')
 const auth = require('../middleware/auth')
 const actionLog = require('../helper/actionLog')
 const mailSend = require('../helper/mailSend')
+const paypal = require('paypal-rest-sdk');
 const router = new express.Router()
+
+
+// configure paypal with the credentials you got when you created your paypal app
+paypal.configure({
+    'mode': 'sandbox', //sandbox or live 
+    'client_id': 'AblAraG-7OvD-xecbqFX6JzsOyIRoX0jll-96KDZe0inobJvb3IfPEzYjTpm_GB-IHOT_YrvsPVWjS_p', // please provide your client id here 
+    'client_secret': 'EBLpSeURLONVjzATT_xTG59fJuZ94CHDyJvaE8fz5MLq6YtGWpfiVfJgf2jCAQ2BVASk4Z_IX6sLI2AE' // provide your client secret here 
+  });
 
 router.post('/gigs', auth, async (req, res) => {
     const gig = new Gig(req.body)
@@ -26,7 +35,7 @@ router.post('/gigs', auth, async (req, res) => {
     }
 })
 
-router.get('/gigs', auth, async (req, res) => {
+router.get('/gigs', async (req, res) => {
     try {
         const gigs = await Gig.find({}).populate('venue').exec()
         res.send(gigs)
@@ -37,8 +46,8 @@ router.get('/gigs', auth, async (req, res) => {
 
 
 
-router.get('/gigs/:id', auth, async (req, res) => {
-    const _id = req.params.id
+router.get('/gigs/:id',  async (req, res) => {
+   const _id = req.params.id
 
     try {
         const gig = await Gig.findById(_id)
@@ -53,40 +62,51 @@ router.get('/gigs/:id', auth, async (req, res) => {
     }
 })
 
-router.patch('/gigs_buy/:id', auth, async (req, res) => {
+router.patch('/gigs_buy/:id', async (req, res) => {
     const _id = req.params.id
+
    try {
         const gig = await Gig.findById(_id)
 
         if (!gig || (gig.startSeats - gig.soldSeats - parseInt(req.body.amount) < 0)) {
-            return res.status(406).send({ error: 'No or not enough tickets available' })
-        }
-        console.log('GIG: ',gig)
-        const venue = await Venue.findById(gig.venue)
-        console.log('VENUE: ',venue)
-        gig['soldSeats'] += parseInt(req.body.amount)
-        await gig.save()
-        actionLog(`${req.body.amount} Tickets bought/refunded`, req.headers.authorization, gig)
+            return res.status(406).send('No or not enough tickets available')
+        }  
         if (!gig) {
             return res.status(404).send()
         }
-        if (gig.startSeats - gig.soldSeats == 0) {
+        
+        gig['soldSeats'] += parseInt(req.body.amount)
+        await gig.save()
+        console.log('number of seats decreased by: ', req.body.amount)
+        if (req.headers.authorization){
+            actionLog(`${req.body.amount} Tickets bought/refunded by Reseller`, req.headers.authorization, gig)
+        } else {
+            actionLog(`${req.body.amount} Tickets paypalled by ${req.body.buyer}`, undefined, gig)
+        }
+        const venue = await Venue.findById(gig.venue)
+        if (gig.Venue && gig.startSeats - gig.soldSeats == 0) {
             mailSend(venue.contact.email, 'Fully Booked', `Hi ${venue.contact.name}, the Grosse-Kiesau-Literaturnacht-gig "${gig.title}" is fully booked!`)
        }
 
         res.send(gig)
+
     } catch (e) {
         res.status(500).send()
     }
 })
 
+
+
+
+
+
 router.patch('/gigs/:id', auth, async (req, res) => {
     const updates = Object.keys(req.body)
-    const allowedUpdates = ['houseNo', 'title', 'performer', 'venue', 'startSeats']
+    const allowedUpdates = ['houseNo', 'title', 'performer', 'venue', 'feeEur', 'startSeats']
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
 
     if (!isValidOperation) {
-        return res.status(400).send({ error: 'Invalid updates!' })
+        return res.status(400).send('Invalid updates!')
     }
 
     try {
@@ -106,7 +126,7 @@ router.patch('/gigs/:id', auth, async (req, res) => {
         if (seats > 0) {
             gig.startSeats = seats
         } else {
-            return res.status(400).send({ error: 'No seats available!' })
+            return res.status(400).send('No seats available!')
         }
         await gig.save()
         actionLog('Gig edited', req.headers.authorization, gig)
@@ -119,6 +139,7 @@ router.patch('/gigs/:id', auth, async (req, res) => {
     } catch (e) {
         res.status(400).send(e)
     }
+    
 })
 
 router.delete('/gigs/:id', auth, async (req, res) => {
@@ -134,5 +155,20 @@ router.delete('/gigs/:id', auth, async (req, res) => {
         res.status(500).send()
     }
 })
+
+router.patch('/gigs_ticket/:id',  async (req, res) => {
+    const buyer = req.body.buyer
+    const amount = parseInt(req.body.amount)
+    try {
+        const gig = await Gig.findById(req.params.id)
+        for (var i = 0; i < amount; i++ ){
+            await gig.generateTicket(buyer)
+            res.status(201).send()
+        }   
+    } catch (e) {
+        res.status(400).send()
+    }
+})
+
 
 module.exports = router
