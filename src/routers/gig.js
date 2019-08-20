@@ -6,6 +6,7 @@ const auth = require('../middleware/auth')
 const actionLog = require('../helper/actionLog')
 const mailSend = require('../helper/mailSend')
 const router = new express.Router()
+const validator = require('validator')
 
 
 
@@ -158,7 +159,12 @@ router.patch('/gigs_ticket/:id',  async (req, res) => {
         for (var i = 0; i < amount; i++ ){
             await gig.generateTicket(buyer)
             res.status(201).send()
-        }   
+        } 
+        validate(buyer) {
+            if (validator.isEmail(buyer)) {
+                await mailSend(buyer, 'Tickets for Große Kiesau Literaturnacht', `Hi, you have purchased ${amount} ticket(s) for House No. ${gig.houseNo}. More information at www.grosse-kiesau.de.`)
+            } 
+        } 
     } catch (e) {
         res.status(400).send()
     }
