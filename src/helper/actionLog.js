@@ -5,7 +5,6 @@ const jwt = require('jsonwebtoken')
 const actionLog = async (keyword, authorization, JSONcontent) => {
     if (authorization){
         try {
-            console.log('aha')
             const creatorToken = authorization.split(' ');
             const decoded = jwt.verify(creatorToken[1], process.env.JWT_SECRET);
             const creator = await User.findById(decoded)

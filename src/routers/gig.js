@@ -5,16 +5,10 @@ const Venue = require('../models/venue')
 const auth = require('../middleware/auth')
 const actionLog = require('../helper/actionLog')
 const mailSend = require('../helper/mailSend')
-const paypal = require('paypal-rest-sdk');
 const router = new express.Router()
 
 
-// configure paypal with the credentials you got when you created your paypal app
-paypal.configure({
-    'mode': 'sandbox', //sandbox or live 
-    'client_id': 'AblAraG-7OvD-xecbqFX6JzsOyIRoX0jll-96KDZe0inobJvb3IfPEzYjTpm_GB-IHOT_YrvsPVWjS_p', // please provide your client id here 
-    'client_secret': 'EBLpSeURLONVjzATT_xTG59fJuZ94CHDyJvaE8fz5MLq6YtGWpfiVfJgf2jCAQ2BVASk4Z_IX6sLI2AE' // provide your client secret here 
-  });
+
 
 router.post('/gigs', auth, async (req, res) => {
     const gig = new Gig(req.body)
@@ -77,7 +71,7 @@ router.patch('/gigs_buy/:id', async (req, res) => {
         
         gig['soldSeats'] += parseInt(req.body.amount)
         await gig.save()
-        console.log('number of seats decreased by: ', req.body.amount)
+        //console.log('number of seats decreased by: ', req.body.amount)
         if (req.headers.authorization){
             actionLog(`${req.body.amount} Tickets bought/refunded by Reseller`, req.headers.authorization, gig)
         } else {
@@ -167,6 +161,30 @@ router.patch('/gigs_ticket/:id',  async (req, res) => {
         }   
     } catch (e) {
         res.status(400).send()
+    }
+})
+
+router.post('/gigs_list/:id',  async (req, res) => {
+    console.log('LIST')
+    const _id = req.params.id
+    try {
+        const gig = await Gig.findById(req.params.id)
+        console.log('GIG_ID', _id)
+        const venue = await Venue.findById(gig.venue)
+        console.log('VENUE', venue)
+        const email = await venue.contact.email
+        console.log('VENUE_CONTACT_EMAIL', email)
+        console.log('TICKETS', gig.tickets)
+        const ticketList = await gig.tickets
+        if (ticketList == []) {
+            ticketList = ['No tickets sold']
+        }
+        if (email) {
+            console.log('EMAIL', email)
+            await mailSend(email, 'Tickets sold with Paypal', ticketList.join("\n"))
+       }  res.status(201).send(`List sent to ${email}`)
+    } catch (e) {
+        res.status(400).send(e)
     }
 })
 

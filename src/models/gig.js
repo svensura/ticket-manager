@@ -67,13 +67,15 @@ const gigSchema = new mongoose.Schema({
         buyer: {
             type: String,
             required: true
-        }
+        },
+        date: Date
     }]
 })
 
 gigSchema.methods.generateTicket = async function (buyer) {
     const gig = this
-    gig.tickets = gig.tickets.concat({ buyer })
+    const date = new Date
+    gig.tickets = gig.tickets.concat({ buyer, date })
     await gig.save()
 
     return buyer
