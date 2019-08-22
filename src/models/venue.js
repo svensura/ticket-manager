@@ -42,7 +42,11 @@ const Venue = mongoose.model('Venue', {
     active: {
         type: Boolean,
         default: true
-    }
+    },
+    coords: {
+        type: Array
+        }
+
 })
 
 module.exports = Venue

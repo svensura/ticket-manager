@@ -169,22 +169,16 @@ router.patch('/gigs_ticket/:id',  async (req, res) => {
 })
 
 router.post('/gigs_list/:id',  async (req, res) => {
-    console.log('LIST')
     const _id = req.params.id
     try {
         const gig = await Gig.findById(req.params.id)
-        console.log('GIG_ID', _id)
         const venue = await Venue.findById(gig.venue)
-        console.log('VENUE', venue)
         const email = await venue.contact.email
-        console.log('VENUE_CONTACT_EMAIL', email)
-        console.log('TICKETS', gig.tickets)
         const ticketList = await gig.tickets
         if (ticketList == []) {
             ticketList = ['No tickets sold']
         }
         if (email) {
-            console.log('EMAIL', email)
             await mailSend(email, 'Tickets sold with Paypal', ticketList.join("\n"))
        }  res.status(201).send(`List sent to ${email}`)
     } catch (e) {
