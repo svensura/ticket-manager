@@ -13,9 +13,7 @@ router.post('/venues', auth, async (req, res) => {
         if (errorMessage){
             console.log(errorMessage);
         } else {
-            venue.coords.length = 0
-            venue.coords.push(results.latitude)
-            venue.coords.push(results.longitude)
+            venue.update({$set: {coords: [results.latitude, results.longitude]}})
             try {
                 venue.save()
                 console.log(venue)
@@ -82,11 +80,6 @@ router.patch('/venues/:id', auth, async (req, res) => {
                 console.log(errorMessage);
             } else {
                 venue.update({$set: {coords: [results.latitude, results.longitude]}})
-                // venue.coords.push(results.latitude)
-                // venue.coords.push(results.longitude)
-                // venue.coords.push('456')
-                // venue.coords.push('789')
-                
                 venue.save()
                 console.log(venue)
                 actionLog('Venue edited', req.headers.authorization, venue)
