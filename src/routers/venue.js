@@ -13,7 +13,8 @@ router.post('/venues', auth, async (req, res) => {
         if (errorMessage){
             console.log(errorMessage);
         } else {
-            venue.update({$set: {coords: [results.latitude, results.longitude]}})
+            venue.coords.push(results.latitude)
+            venue.coords.push(results.longitude)
             try {
                 venue.save()
                 console.log(venue)
