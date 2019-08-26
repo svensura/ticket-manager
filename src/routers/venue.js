@@ -81,7 +81,7 @@ router.patch('/venues/:id', auth, async (req, res) => {
             if (errorMessage){
                 console.log(errorMessage);
             } else {
-                venue.coords.length = 0
+                venue.update({$set: {coords: []}})
                 venue.coords.push(results.latitude)
                 venue.coords.push(results.longitude)
                 venue.save()
