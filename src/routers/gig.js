@@ -142,7 +142,7 @@ router.delete('/gigs/:id', auth, async (req, res) => {
         const gig = await Gig.findByIdAndDelete(req.params.id)
         actionLog('Gig deleted', req.headers.authorization, gig)
         if (!gig) {
-            res.status(404).send()
+            return res.status(404).send()
         }
 
         res.send(gig)
@@ -168,7 +168,7 @@ router.patch('/gigs_ticket/:id',  async (req, res) => {
     }
 })
 
-router.post('/gigs_list/:id',  async (req, res) => {
+router.post('/gigs_paypal_list_email/:id',  auth, async (req, res) => {
     const _id = req.params.id
     try {
         const gig = await Gig.findById(req.params.id)
@@ -179,12 +179,42 @@ router.post('/gigs_list/:id',  async (req, res) => {
             ticketList = ['No tickets sold']
         }
         if (email) {
-            await mailSend(email, 'Tickets sold with Paypal', ticketList.join("\n"))
+            await mailSend(email, `Tickets sold with Paypal for House No. ${gig.houseNo}, ${venue.address}`, ticketList.join("\n"))
        }  res.status(201).send(`List sent to ${email}`)
     } catch (e) {
         res.status(400).send(e)
     }
 })
 
+router.post('/dashboard_paypal_list_email/:id',  auth, async (req, res) => {
+    const _id = req.params.id
+    try {
+        const gig = await Gig.findById(req.params.id)
+        const venue = await Venue.findById(gig.venue)
+        const email = await req.user.email
+        const ticketList = await gig.tickets
+        if (ticketList == []) {
+            ticketList = ['No tickets sold']
+        }
+        if (email) {
+            await mailSend(email, `Tickets sold with Paypal for House No. ${gig.houseNo}, ${venue.address}`, ticketList.join("\n"))
+       }  res.status(201).send(`List sent to ${email}`)
+    } catch (e) {
+        res.status(400).send(e)
+    }
+})
+
+router.get('/gigs_paypal_list_dashboard/:id', auth, async (req, res) => {
+    try {
+        const gig = await Gig.findById(req.params.id)
+ 
+        if (!gig) {
+            return res.status(404).send()
+        }
+        res.send(gig.tickets)
+     } catch (e) {
+        res.status(500).send()
+     }
+ })
 
 module.exports = router
