@@ -63,15 +63,15 @@ userSchema.methods.toJSON = function () {
     return userObject
 }
 
-userSchema.methods.generateAuthToken = async function (isVendor) {
+userSchema.methods.generateAuthToken = async function () {
     const user = this
-    if (!isVendor) {
+    if (!user.vendor) {
         const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET)
         user.tokens = user.tokens.concat({ token })
         await user.save()
         return token
     } else {
-        const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET)
+        const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET_VENDOR)
         user.tokens = user.tokens.concat({ token })
         await user.save()
         return token

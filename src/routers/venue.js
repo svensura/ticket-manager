@@ -84,7 +84,7 @@ router.patch('/venues/:id', authUser, async (req, res) => {
                 venue.update({$set: {coords: [results.latitude, results.longitude]}})
                 venue.save()
                 console.log(venue)
-                actionLog('Venue edited', req.headers.authorization, venue)
+                actionLog('Venue edited', req.headers.authorization, venue, process.env.JWT_SECRET)
                 res.status(201).send(venue)
             }
         }) 
@@ -96,7 +96,7 @@ router.patch('/venues/:id', authUser, async (req, res) => {
 router.delete('/venues/:id', authUser, async (req, res) => {
     try {
         const venue = await Venue.findByIdAndDelete(req.params.id)
-        actionLog('Venue deleted', req.headers.authorization, venue)
+        actionLog('Venue deleted', req.headers.authorization, venue, process.env.JWT_SECRET)
         if (!venue) {
             res.status(404).send()
         }

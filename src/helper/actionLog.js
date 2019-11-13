@@ -2,11 +2,11 @@ const User = require('../models/user')
 const LogEntry = require('../models/logEntry')
 const jwt = require('jsonwebtoken')
 
-const actionLog = async (keyword, authorization, JSONcontent) => {
+const actionLog = async (keyword, authorization, JSONcontent, secret) => {
     if (authorization){
         try {
             const creatorToken = authorization.split(' ');
-            const decoded = jwt.verify(creatorToken[1], process.env.JWT_SECRET);
+            const decoded = jwt.verify(creatorToken[1], secret);
             const creator = await User.findById(decoded)
             const logEntry = new LogEntry
             

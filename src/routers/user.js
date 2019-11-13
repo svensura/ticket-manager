@@ -11,9 +11,8 @@ router.post('/users', authUser, async (req, res) => {
     try {
 
         await user.save()
-        actionLog('Vendor created', req.headers.authorization, user)
-        console.log(user.vendor)
-        const token = await user.generateAuthToken(user.vendor)
+        actionLog(`${user.vendor?"Vendor":"User"} created`, req.headers.authorization, user)
+        const token = await user.generateAuthToken()
         res.status(201).send({ user, token })
     } catch (e) {
         res.status(400).send(e)
@@ -23,9 +22,10 @@ router.post('/users', authUser, async (req, res) => {
 
 
 router.post('/users/login', async (req, res) => {
+    
     try {
         const user = await User.findByCredentials(req.body.email, req.body.password)
-        const token = await user.generateAuthToken(user.vendor)
+        const token = await user.generateAuthToken()
         res.send({ user, token })
     } catch (e) {
         res.status(400).send()
@@ -77,9 +77,9 @@ router.get('/users', authUser, async (req, res) => {
     }
 })
 
-// router.get('/users/me', auth, async (req, res) => {
-//     res.send(req.user)
-// })
+router.get('/users/me', authVendor, async (req, res) => {
+    res.send(req.user)
+})
 
 // router.patch('/users/me', auth, async (req, res) => {
 //     const updates = Object.keys(req.body)
@@ -127,7 +127,6 @@ router.get('/users/:id', async (req, res) => {
 })
 
 router.patch('/users/:id', authUser, async (req, res) => {
-    console.log('PATCH ', req.params.id)
     const updates = Object.keys(req.body)
     const allowedUpdates = ['name', 'email', 'password', 'phone',]
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
@@ -140,7 +139,7 @@ router.patch('/users/:id', authUser, async (req, res) => {
         const user = await User.findById(req.params.id)
 
         updates.forEach((update) => user[update] = req.body[update])
-        actionLog('User edited', req.headers.authorization, user)
+        actionLog('User edited', req.headers.authorization, user, process.env.JWT_SECRET)
         await user.save()
 
         if (!user) {
@@ -157,7 +156,7 @@ router.delete('/users/:id', authUser, async (req, res) => {
     try {
         const user = await User.findByIdAndDelete(req.params.id)
 
-        actionLog('All users deleted', req.headers.authorization, user)
+        actionLog('All users deleted', req.headers.authorization, user, process.env.JWT_SECRET)
 
         if (!user || authUser == user )
         {

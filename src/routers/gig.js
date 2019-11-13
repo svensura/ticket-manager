@@ -25,7 +25,7 @@ router.post('/gigs', authUser, async (req, res) => {
      
    try {
         await gig.save()
-        actionLog('Gig created', req.headers.authorization, gig)
+        actionLog('Gig created', req.headers.authorization, gig, process.env.JWT_SECRET)
         res.status(201).send(gig)
     } catch (e) {
         res.status(400).send(e)
@@ -65,21 +65,21 @@ router.patch('/gigs_buy/:id', authVendor, async (req, res) => {
 
    try {
         const gig = await Gig.findById(_id)
-
-        if (!gig || (gig.startSeats - gig.soldSeats - parseInt(req.body.amount) < 0)) {
+        const amount = parseInt(req.body.amount)
+        if (!gig || (gig.startSeats - gig.soldSeats - amount < 0)) {
             return res.status(406).send('No or not enough tickets available')
         }  
         if (!gig) {
             return res.status(404).send()
         }
         
-        gig['soldSeats'] += parseInt(req.body.amount)
+        gig['soldSeats'] += amount
         await gig.save()
         //console.log('number of seats decreased by: ', req.body.amount)
         if (req.headers.authorization){
-            actionLog(`${req.body.amount} Tickets bought/refunded by Reseller`, req.headers.authorization, gig)
+            actionLog(`${amount} Ticket(s) ${amount > 0 ? "sold" : "refunded"} by Reseller`, req.headers.authorization, gig, process.env.JWT_SECRET_VENDOR)
         } else {
-            actionLog(`${req.body.amount} Tickets paypalled by ${req.body.buyer}`, undefined, gig)
+            actionLog(`${req.body.amount} Ticket(s) paypalled by ${req.body.buyer}`, undefined, gig, undefined)
         }
         const venue = await Venue.findById(gig.venue)
         if (gig.Venue && gig.startSeats - gig.soldSeats == 0) {
@@ -127,7 +127,7 @@ router.patch('/gigs/:id', authUser, async (req, res) => {
             return res.status(400).send('No seats available!')
         }
         await gig.save()
-        actionLog('Gig edited', req.headers.authorization, gig)
+        actionLog('Gig edited', req.headers.authorization, gig, process.env.JWT_SECRET)
 
         if (!gig) {
             return res.status(404).send()
@@ -143,7 +143,7 @@ router.patch('/gigs/:id', authUser, async (req, res) => {
 router.delete('/gigs/:id', authUser, async (req, res) => {
     try {
         const gig = await Gig.findByIdAndDelete(req.params.id)
-        actionLog('Gig deleted', req.headers.authorization, gig)
+        actionLog('Gig deleted', req.headers.authorization, gig, process.env.JWT_SECRET)
         if (!gig) {
             return res.status(404).send()
         }
