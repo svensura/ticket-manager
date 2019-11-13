@@ -2,7 +2,9 @@ const express = require('express')
 const mongoose = require('mongoose')
 const Gig = require('../models/gig')
 const Venue = require('../models/venue')
-const auth = require('../middleware/auth')
+const auth = require('../middleware/authUser')
+const authUser = require('../middleware/authUser')
+const authVendor = require('../middleware/authVendor')
 const actionLog = require('../helper/actionLog')
 const mailSend = require('../helper/mailSend')
 const router = new express.Router()
@@ -11,7 +13,7 @@ const validator = require('validator')
 
 
 
-router.post('/gigs', auth, async (req, res) => {
+router.post('/gigs', authUser, async (req, res) => {
     const gig = new Gig(req.body)
     const venue = await Venue.findById(req.body.venue)
     const seats = venue.seats
@@ -57,7 +59,8 @@ router.get('/gigs/:id',  async (req, res) => {
     }
 })
 
-router.patch('/gigs_buy/:id', async (req, res) => {
+// Purchase by vendor
+router.patch('/gigs_buy/:id', authVendor, async (req, res) => {
     const _id = req.params.id
 
    try {
@@ -95,7 +98,7 @@ router.patch('/gigs_buy/:id', async (req, res) => {
 
 
 
-router.patch('/gigs/:id', auth, async (req, res) => {
+router.patch('/gigs/:id', authUser, async (req, res) => {
     const updates = Object.keys(req.body)
     const allowedUpdates = ['houseNo', 'title', 'performer', 'venue', 'feeEur', 'startSeats']
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
@@ -137,7 +140,7 @@ router.patch('/gigs/:id', auth, async (req, res) => {
     
 })
 
-router.delete('/gigs/:id', auth, async (req, res) => {
+router.delete('/gigs/:id', authUser, async (req, res) => {
     try {
         const gig = await Gig.findByIdAndDelete(req.params.id)
         actionLog('Gig deleted', req.headers.authorization, gig)
@@ -151,6 +154,7 @@ router.delete('/gigs/:id', auth, async (req, res) => {
     }
 })
 
+// Purchase by PayPal
 router.patch('/gigs_ticket/:id',  async (req, res) => {
     const buyer = req.body.buyer
     const amount = parseInt(req.body.amount)
@@ -168,7 +172,7 @@ router.patch('/gigs_ticket/:id',  async (req, res) => {
     }
 })
 
-router.post('/gigs_paypal_list_email/:id',  auth, async (req, res) => {
+router.post('/gigs_paypal_list_email/:id',  authUser, async (req, res) => {
     const _id = req.params.id
     try {
         const gig = await Gig.findById(req.params.id)
@@ -186,7 +190,7 @@ router.post('/gigs_paypal_list_email/:id',  auth, async (req, res) => {
     }
 })
 
-router.post('/dashboard_paypal_list_email/:id',  auth, async (req, res) => {
+router.post('/dashboard_paypal_list_email/:id',  authUser, async (req, res) => {
     const _id = req.params.id
     try {
         const gig = await Gig.findById(req.params.id)
@@ -204,7 +208,7 @@ router.post('/dashboard_paypal_list_email/:id',  auth, async (req, res) => {
     }
 })
 
-router.get('/gigs_paypal_list_dashboard/:id', auth, async (req, res) => {
+router.get('/gigs_paypal_list_dashboard/:id', authUser, async (req, res) => {
     try {
         const gig = await Gig.findById(req.params.id)
  

@@ -1,12 +1,13 @@
 const express = require('express')
 const Venue = require('../models/venue')
-const auth = require('../middleware/auth')
+const authUser = require('../middleware/authUser')
+const auth = require('../middleware/authUser')
 const actionLog = require('../helper/actionLog')
 const geocode = require('../helper/geocode');
 const router = new express.Router()
 
 
-router.post('/venues', auth, async (req, res) => {
+router.post('/venues', authUser, async (req, res) => {
     const venue = new Venue(req.body)
     
     await geocode.geocodeAddress(venue.address, async (errorMessage, results) => {
@@ -37,7 +38,7 @@ router.post('/venues', auth, async (req, res) => {
     
 })
 
-router.get('/venues', auth, async (req, res) => {
+router.get('/venues', authUser, async (req, res) => {
     try {
         const venues = await Venue.find({})
         res.send(venues)
@@ -46,7 +47,7 @@ router.get('/venues', auth, async (req, res) => {
     }
 })
 
-router.get('/venues/:id', auth, async (req, res) => {
+router.get('/venues/:id', authUser, async (req, res) => {
     const _id = req.params.id
 
     try {
@@ -62,7 +63,7 @@ router.get('/venues/:id', auth, async (req, res) => {
     }
 })
 
-router.patch('/venues/:id', auth, async (req, res) => {
+router.patch('/venues/:id', authUser, async (req, res) => {
     const updates = Object.keys(req.body)
     const allowedUpdates = ['address', 'contact', 'seats', 'active']
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
@@ -92,7 +93,7 @@ router.patch('/venues/:id', auth, async (req, res) => {
     }
 })
 
-router.delete('/venues/:id', auth, async (req, res) => {
+router.delete('/venues/:id', authUser, async (req, res) => {
     try {
         const venue = await Venue.findByIdAndDelete(req.params.id)
         actionLog('Venue deleted', req.headers.authorization, venue)
@@ -106,7 +107,7 @@ router.delete('/venues/:id', auth, async (req, res) => {
     }
 })
 
-router.get('/venues_geo/:id', auth, async (req, res) => {
+router.get('/venues_geo/:id', authUser, async (req, res) => {
     const _id = req.params.id
 
     try {
@@ -119,7 +120,6 @@ router.get('/venues_geo/:id', auth, async (req, res) => {
             const address = await venue.address
             const city = 'Luebeck, Germany'
             const coord = geocodeAddress(address + ',' + city)
-            console.log(coord)
         } else {
             res.send(null)
         }   

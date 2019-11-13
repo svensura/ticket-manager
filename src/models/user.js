@@ -8,6 +8,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true
+    },    
+    vendor: {
+        type: Boolean,
+        default: false
     },
     email: {
         type: String,
@@ -59,13 +63,19 @@ userSchema.methods.toJSON = function () {
     return userObject
 }
 
-userSchema.methods.generateAuthToken = async function () {
+userSchema.methods.generateAuthToken = async function (isVendor) {
     const user = this
-    const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET)
-    user.tokens = user.tokens.concat({ token })
-    await user.save()
-
-    return token
+    if (!isVendor) {
+        const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET)
+        user.tokens = user.tokens.concat({ token })
+        await user.save()
+        return token
+    } else {
+        const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET)
+        user.tokens = user.tokens.concat({ token })
+        await user.save()
+        return token
+    }
 }
 
 userSchema.statics.findByCredentials = async (email, password) => {
