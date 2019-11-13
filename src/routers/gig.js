@@ -77,7 +77,7 @@ router.patch('/gigs_buy/:id', authVendor, async (req, res) => {
         await gig.save()
         //console.log('number of seats decreased by: ', req.body.amount)
         if (req.headers.authorization){
-            actionLog(`${amount} Ticket(s) ${amount > 0 ? "sold" : "refunded"} by Reseller`, req.headers.authorization, gig, process.env.JWT_SECRET_VENDOR)
+            actionLog(`${amount} Ticket(s) ${amount > 0 ? "sold" : "refunded"} by Reseller`, req.headers.authorization, gig, process.env.JWT_SECRET + "VENDOR")
         } else {
             actionLog(`${req.body.amount} Ticket(s) paypalled by ${req.body.buyer}`, undefined, gig, undefined)
         }

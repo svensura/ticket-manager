@@ -19,7 +19,7 @@ router.post('/venues', authUser, async (req, res) => {
             try {
                 venue.save()
                 console.log(venue)
-                actionLog('Venue created', req.headers.authorization, venue)
+                actionLog('Venue created', req.headers.authorization, venue, process.env.JWT_SECRET)
                 res.status(201).send(venue)
             } catch (e) {
                 res.status(400).send(e)

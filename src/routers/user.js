@@ -11,7 +11,7 @@ router.post('/users', authUser, async (req, res) => {
     try {
 
         await user.save()
-        actionLog(`${user.vendor?"Vendor":"User"} created`, req.headers.authorization, user)
+        actionLog(`${user.vendor?"Vendor":"User"} created`, req.headers.authorization, user, process.env.JWT_SECRET)
         const token = await user.generateAuthToken()
         res.status(201).send({ user, token })
     } catch (e) {
