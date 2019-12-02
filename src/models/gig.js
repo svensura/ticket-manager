@@ -1,5 +1,7 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
+const User = require('../models/user')
+const jwt = require('jsonwebtoken')
 
 const gigSchema = new mongoose.Schema({
 
@@ -63,22 +65,50 @@ const gigSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    tickets: [{
+    vendorTickets: [{
+        vendor: {
+            type: String,
+            required: true
+        },
+        amount: Number,
+        date: Date
+    }],
+    paypalTickets: [{
         buyer: {
             type: String,
             required: true
         },
         date: Date
     }]
+    
 })
 
-gigSchema.methods.generateTicket = async function (buyer) {
+gigSchema.methods.generatePaypalTicket = async function (buyer) {
     const gig = this
     const date = new Date
-    gig.tickets = gig.tickets.concat({ buyer, date })
+    gig.paypalTickets = gig.paypalTickets.concat({ buyer, date })
     await gig.save()
 
     return buyer
+}
+
+gigSchema.methods.generateVendorTicket = async function (authorization, amount, secret) {
+    try {
+        const vendorToken = authorization.split(' ');
+        const decoded = jwt.verify(vendorToken[1], secret);
+        const vendor = await User.findById(decoded)
+        const gig = this
+        const date = new Date
+        gig.vendorTickets = gig.vendorTickets.concat({ vendor, date, amount })
+        try {
+            await gig.save()
+        } catch (e) {
+            throw new Error(e)
+        }
+    } catch (e) {
+        throw new Error(e)
+    }
+    return
 }
 
 const Gig = mongoose.model('Gig', gigSchema)

@@ -2,7 +2,6 @@ const express = require('express')
 const User = require('../models/user')
 const authUser = require('../middleware/authUser')
 const authVendor = require('../middleware/authVendor')
-const auth = require('../middleware/authUser')
 const actionLog = require('../helper/actionLog')
 const router = new express.Router()
 

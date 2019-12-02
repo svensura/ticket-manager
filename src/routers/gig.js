@@ -2,13 +2,16 @@ const express = require('express')
 const mongoose = require('mongoose')
 const Gig = require('../models/gig')
 const Venue = require('../models/venue')
-const auth = require('../middleware/authUser')
 const authUser = require('../middleware/authUser')
 const authVendor = require('../middleware/authVendor')
 const actionLog = require('../helper/actionLog')
 const mailSend = require('../helper/mailSend')
+const mailAttachSend = require('../helper/mailAttachSend')
 const router = new express.Router()
 const validator = require('validator')
+const excel = require('excel4node')
+const util = require('util')
+
 
 
 
@@ -74,10 +77,10 @@ router.patch('/gigs_buy/:id', authVendor, async (req, res) => {
         }
         
         gig['soldSeats'] += amount
+        await gig.generateVendorTicket(req.headers.authorization, amount, process.env.JWT_SECRET + "VENDOR")
         await gig.save()
-        //console.log('number of seats decreased by: ', req.body.amount)
         if (req.headers.authorization){
-            actionLog(`${amount} Ticket(s) ${amount > 0 ? "sold" : "refunded"} by Reseller`, req.headers.authorization, gig, process.env.JWT_SECRET + "VENDOR")
+            actionLog(`${Math.abs(amount)} Ticket(s) ${amount > 0 ? "sold" : "refunded"} by Vendor`, req.headers.authorization, gig, process.env.JWT_SECRET + "VENDOR")
         } else {
             actionLog(`${req.body.amount} Ticket(s) paypalled by ${req.body.buyer}`, undefined, gig, undefined)
         }
@@ -161,7 +164,7 @@ router.patch('/gigs_ticket/:id',  async (req, res) => {
     try {
         const gig = await Gig.findById(req.params.id)
         for (var i = 0; i < amount; i++ ){
-            await gig.generateTicket(buyer)
+            await gig.generatePaypalTicket(buyer)
             res.status(201).send()
         }
         if (validator.isEmail(buyer)) {
@@ -173,12 +176,11 @@ router.patch('/gigs_ticket/:id',  async (req, res) => {
 })
 
 router.post('/gigs_paypal_list_email/:id',  authUser, async (req, res) => {
-    const _id = req.params.id
     try {
         const gig = await Gig.findById(req.params.id)
         const venue = await Venue.findById(gig.venue)
         const email = await venue.contact.email
-        const ticketList = await gig.tickets
+        const ticketList = await gig.paypalTickets
         if (ticketList == []) {
             ticketList = ['No tickets sold']
         }
@@ -191,12 +193,11 @@ router.post('/gigs_paypal_list_email/:id',  authUser, async (req, res) => {
 })
 
 router.post('/dashboard_paypal_list_email/:id',  authUser, async (req, res) => {
-    const _id = req.params.id
-    try {
+   try {
         const gig = await Gig.findById(req.params.id)
         const venue = await Venue.findById(gig.venue)
         const email = await req.user.email
-        const ticketList = await gig.tickets
+        const ticketList = await gig.paypalTickets
         if (ticketList == []) {
             ticketList = ['No tickets sold']
         }
@@ -215,10 +216,59 @@ router.get('/gigs_paypal_list_dashboard/:id', authUser, async (req, res) => {
         if (!gig) {
             return res.status(404).send()
         }
-        res.send(gig.tickets)
+        res.send(gig.paypalTickets)
      } catch (e) {
         res.status(500).send()
      }
  })
+
+ router.post('/gigs_list_email',  authVendor, async (req, res) => {
+    try {
+        const email = await req.user.email
+        const VendorId = await req.user._id
+        const gigs = await Gig.find({})
+        var workbook = new excel.Workbook();
+        workbook.writeP = util.promisify(workbook.write)
+        var worksheet = workbook.addWorksheet('Tickets sold by ', req.user.name);
+
+        var style = workbook.createStyle({
+            font: {
+              color: '#000000',
+              size: 12
+            },
+            numberFormat: '€#,##0.00; (€#,##0.00); -'
+          });
+
+
+        worksheet.cell(1,1).string('House No.')
+        worksheet.cell(1,2).string('Gig')
+        worksheet.cell(1,3).string('Sold tickets')
+        worksheet.cell(1,4).string('Ticket fee')
+        worksheet.cell(1,5).string('Total')
+        
+        var i = 2
+        gigs.forEach(gig => {
+            worksheet.cell(i,1).number(gig.houseNo);
+            worksheet.cell(i,2).string(gig.title)
+            var amount = 0
+            gig.vendorTickets.forEach(vendorTicket => {
+               if (vendorTicket.vendor._id = VendorId) {
+                    amount += vendorTicket.amount
+                }
+            })
+            worksheet.cell(i,3).number(amount)
+            worksheet.cell(i,4).number(parseFloat(gig.feeEur)).style(style);
+            worksheet.cell(i,5).number(parseFloat(gig.feeEur) * amount).style(style);
+            i++
+        });
+        await workbook.writeP('sellingReport.xlsx')
+        if (email) {
+           mailAttachSend(email, `Tickets sold by ${req.user.name}`,"")
+        }  
+        res.status(201).send(`List sent to ${email}`)
+    } catch (e) {
+        res.status(400).send(e)
+    }
+})
 
 module.exports = router

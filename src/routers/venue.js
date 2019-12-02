@@ -1,7 +1,6 @@
 const express = require('express')
 const Venue = require('../models/venue')
 const authUser = require('../middleware/authUser')
-const auth = require('../middleware/authUser')
 const actionLog = require('../helper/actionLog')
 const geocode = require('../helper/geocode');
 const router = new express.Router()
