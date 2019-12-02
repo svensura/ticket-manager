@@ -2,6 +2,7 @@ const express = require('express')
 const mongoose = require('mongoose')
 const Gig = require('../models/gig')
 const Venue = require('../models/venue')
+const User = require('../models/user')
 const authUser = require('../middleware/authUser')
 const authVendor = require('../middleware/authVendor')
 const actionLog = require('../helper/actionLog')
@@ -224,51 +225,68 @@ router.get('/gigs_paypal_list_dashboard/:id', authUser, async (req, res) => {
 
  router.post('/gigs_list_email',  authVendor, async (req, res) => {
     try {
-        const email = await req.user.email
-        const VendorId = await req.user._id
-        const gigs = await Gig.find({})
-        var workbook = new excel.Workbook();
-        workbook.writeP = util.promisify(workbook.write)
-        var worksheet = workbook.addWorksheet('Tickets sold by ', req.user.name);
-
-        var style = workbook.createStyle({
-            font: {
-              color: '#000000',
-              size: 12
-            },
-            numberFormat: '€#,##0.00; (€#,##0.00); -'
-          });
-
-
-        worksheet.cell(1,1).string('House No.')
-        worksheet.cell(1,2).string('Gig')
-        worksheet.cell(1,3).string('Sold tickets')
-        worksheet.cell(1,4).string('Ticket fee')
-        worksheet.cell(1,5).string('Total')
-        
-        var i = 2
-        gigs.forEach(gig => {
-            worksheet.cell(i,1).number(gig.houseNo);
-            worksheet.cell(i,2).string(gig.title)
-            var amount = 0
-            gig.vendorTickets.forEach(vendorTicket => {
-               if (vendorTicket.vendor._id = VendorId) {
-                    amount += vendorTicket.amount
-                }
-            })
-            worksheet.cell(i,3).number(amount)
-            worksheet.cell(i,4).number(parseFloat(gig.feeEur)).style(style);
-            worksheet.cell(i,5).number(parseFloat(gig.feeEur) * amount).style(style);
-            i++
-        });
-        await workbook.writeP('sellingReport.xlsx')
-        if (email) {
-           mailAttachSend(email, `Tickets sold by ${req.user.name}`,"")
-        }  
-        res.status(201).send(`List sent to ${email}`)
+        buildEmailExcelList(req.user.email, req.user._id, req.user.name)
+       res.status(201).send(`List sent to ${req.user.email}`)
     } catch (e) {
         res.status(400).send(e)
     }
 })
+
+router.post('/gigs_list_email/:id',  authUser, async (req, res) => {
+    console.log('ID: ', req.params.id)
+    try {
+        const vendor = await User.findById(req.params.id)
+        console.log('VENDOR: ', vendor.name)
+        if (!vendor) {
+            return res.status(404).send()
+        }
+        buildEmailExcelList(req.user.email, req.params.id, vendor.name)
+       res.status(201).send(`List sent to ${req.user.email}`)
+    } catch (e) {
+        res.status(400).send(e)
+    }
+})
+
+const buildEmailExcelList =  async (email, vendorId, vendorName)  => {
+    const gigs = await Gig.find({})
+    var workbook = new excel.Workbook();
+    workbook.writeP = util.promisify(workbook.write)
+    var worksheet = workbook.addWorksheet('Tickets sold by ' + vendorName);
+
+    var style = workbook.createStyle({
+        font: {
+          color: '#000000',
+          size: 12
+        },
+        numberFormat: '€#,##0.00; (€#,##0.00); -'
+      });
+
+
+    worksheet.cell(1,1).string('House No.')
+    worksheet.cell(1,2).string('Gig')
+    worksheet.cell(1,3).string('Sold tickets')
+    worksheet.cell(1,4).string('Ticket fee')
+    worksheet.cell(1,5).string('Total')
+    
+    var i = 2
+    gigs.forEach(gig => {
+        worksheet.cell(i,1).number(gig.houseNo);
+        worksheet.cell(i,2).string(gig.title)
+        var amount = 0
+        gig.vendorTickets.forEach(vendorTicket => {
+           if (vendorTicket.vendor._id = vendorId) {
+                amount += vendorTicket.amount
+            }
+        })
+        worksheet.cell(i,3).number(amount)
+        worksheet.cell(i,4).number(parseFloat(gig.feeEur)).style(style);
+        worksheet.cell(i,5).number(parseFloat(gig.feeEur) * amount).style(style);
+        i++
+    });
+    await workbook.writeP('sellingReport.xlsx')
+    if (email) {
+       mailAttachSend(email, `Tickets sold by ${vendorName}`,"")
+    }  
+}
 
 module.exports = router
