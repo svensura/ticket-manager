@@ -233,11 +233,9 @@ router.get('/gigs_paypal_list_dashboard/:id', authUser, async (req, res) => {
 })
 
 router.post('/gigs_list_email/:id',  authUser, async (req, res) => {
-    console.log('ID: ', req.params.id)
     try {
         const vendor = await User.findById(req.params.id)
-        console.log('VENDOR: ', vendor.name)
-        if (!vendor) {
+       if (!vendor) {
             return res.status(404).send()
         }
         buildEmailExcelList(req.user.email, req.params.id, vendor.name)
