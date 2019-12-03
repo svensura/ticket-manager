@@ -232,6 +232,15 @@ router.get('/gigs_paypal_list_dashboard/:id', authUser, async (req, res) => {
     }
 })
 
+router.post('/gigs_list_email/paypal',  authUser, async (req, res) => {
+    try {
+        buildEmailExcelList(req.user.email, "paypal", "PayPal")
+       res.status(201).send(`List sent to ${req.user.email}`)
+    } catch (e) {
+        res.status(400).send(e)
+    }
+})
+
 router.post('/gigs_list_email/:id',  authUser, async (req, res) => {
     try {
         const vendor = await User.findById(req.params.id)
@@ -271,11 +280,16 @@ const buildEmailExcelList =  async (email, vendorId, vendorName)  => {
         worksheet.cell(i,1).number(gig.houseNo);
         worksheet.cell(i,2).string(gig.title)
         var amount = 0
-        gig.vendorTickets.forEach(vendorTicket => {
-           if (vendorTicket.vendor._id = vendorId) {
-                amount += vendorTicket.amount
-            }
-        })
+        if (vendorId == "paypal") {
+            gig.paypalTickets.forEach (paypalTicket => amount++)
+        } else {
+            gig.vendorTickets.forEach(vendorTicket => {
+                if (vendorTicket.vendor._id = vendorId) {
+                     amount += vendorTicket.amount
+                 }
+            })
+        }
+
         worksheet.cell(i,3).number(amount)
         worksheet.cell(i,4).number(parseFloat(gig.feeEur)).style(style);
         worksheet.cell(i,5).number(parseFloat(gig.feeEur) * amount).style(style);
