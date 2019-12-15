@@ -281,7 +281,7 @@ const buildEmailExcelList =  async (email, vendorId, vendorName)  => {
         worksheet.cell(i,2).string(gig.title)
         var amount = 0
         if (vendorId == "paypal") {
-            gig.paypalTickets.forEach (paypalTicket => amount++)
+            amount = gig.paypalTickets.length
         } else {
             gig.vendorTickets.forEach(vendorTicket => {
                 if (vendorTicket.vendor._id = vendorId) {
