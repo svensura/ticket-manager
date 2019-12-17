@@ -68,7 +68,7 @@ router.patch('/venues/:id', authUser, async (req, res) => {
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
 
     if (!isValidOperation) {
-        return res.status(400).send({ error: 'Invalid updates!' })
+        return res.status(400).send({ error: 'Invalid updates! - Ungültige Eingaben' })
     }
 
     try {

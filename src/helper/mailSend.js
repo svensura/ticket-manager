@@ -10,8 +10,8 @@ const mailSend = (email, subject, message) => {
         to: email,
         from: process.env.EMAIL_SENDER,
         subject: subject,
-        text: message + "\n\n" + "This message was automatically created by the ticket-system.",
-        
+        //text: message + "\n\n" + "This message was automatically created by the ticket-system.",
+        text: message + "\n\n" + "Diese Meldung wurde vom Ticket-System automatisch erzeugt." 
     })
 }
 

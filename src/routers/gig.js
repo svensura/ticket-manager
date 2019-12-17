@@ -24,7 +24,7 @@ router.post('/gigs', authUser, async (req, res) => {
     if (seats > 0) {
         gig.startSeats = seats
     } else {
-        return res.status(400).send({ error: 'No seats available!' })
+        return res.status(400).send({ error: 'No seats available! - Keine freien Plätze mehr!' })
     }
      
    try {
@@ -71,7 +71,7 @@ router.patch('/gigs_buy/:id', authVendor, async (req, res) => {
         const gig = await Gig.findById(_id)
         const amount = parseInt(req.body.amount)
         if (!gig || (gig.startSeats - gig.soldSeats - amount < 0)) {
-            return res.status(406).send('No or not enough tickets available')
+            return res.status(406).send('No or not enough tickets available! - Keine oder zu wenig TIckets erhältlich!')
         }  
         if (!gig) {
             return res.status(404).send()
@@ -87,7 +87,7 @@ router.patch('/gigs_buy/:id', authVendor, async (req, res) => {
         }
         const venue = await Venue.findById(gig.venue)
         if (gig.Venue && gig.startSeats - gig.soldSeats == 0) {
-            mailSend(venue.contact.email, 'Fully Booked', `Hi ${venue.contact.name}, the Grosse-Kiesau-Literaturnacht-gig "${gig.title}" is fully booked!`)
+            mailSend(venue.contact.email, 'AUSVERKAUFT!', `Hallo ${venue.contact.name}, die Grosse-Kiesau-Literaturnacht-Veranstaltung "${gig.title}" ist ausverkauft!`)
        }
 
         res.send(gig)
@@ -108,7 +108,7 @@ router.patch('/gigs/:id', authUser, async (req, res) => {
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
 
     if (!isValidOperation) {
-        return res.status(400).send('Invalid updates!')
+        return res.status(400).send('Invalid updates! - Ungültige Eingaben')
     }
 
     try {
@@ -128,7 +128,7 @@ router.patch('/gigs/:id', authUser, async (req, res) => {
         if (seats > 0) {
             gig.startSeats = seats
         } else {
-            return res.status(400).send('No seats available!')
+            return res.status(400).send('No seats available! - Keine freien Plätze mehr!')
         }
         await gig.save()
         actionLog('Gig edited', req.headers.authorization, gig, process.env.JWT_SECRET)
@@ -169,7 +169,7 @@ router.patch('/gigs_ticket/:id',  async (req, res) => {
             res.status(201).send()
         }
         if (validator.isEmail(buyer)) {
-            await mailSend(buyer, 'Tickets for Große Kiesau Literaturnacht', `Hi, you have purchased ${amount} ticket(s) for House No. ${gig.houseNo}. More information at www.grosse-kiesau.de.`)
+            await mailSend(buyer, 'Tickets für Große Kiesau Literaturnacht', `Hallo, Sie haben ${amount} Ticket(s) für Haus Nr. ${gig.houseNo} gekauft. Mehr Information zu dieser Veranstaltung auf www.grosse-kiesau.de.`)
         }  
     } catch (e) {
         res.status(400).send()
@@ -186,8 +186,8 @@ router.post('/gigs_paypal_list_email/:id',  authUser, async (req, res) => {
             ticketList = ['No tickets sold']
         }
         if (email) {
-            await mailSend(email, `Tickets sold with Paypal for House No. ${gig.houseNo}, ${venue.address}`, ticketList.join("\n"))
-       }  res.status(201).send(`List sent to ${email}`)
+            await mailSend(email, `Tickets verkauft mit Paypal für Haus Nr. ${gig.houseNo}, ${venue.address}:`, ticketList.join("\n"))
+       }  res.status(201).send(`List sent to / Liste gesendet an ${email}`)
     } catch (e) {
         res.status(400).send(e)
     }
@@ -204,7 +204,7 @@ router.post('/dashboard_paypal_list_email/:id',  authUser, async (req, res) => {
         }
         if (email) {
             await mailSend(email, `Tickets sold with Paypal for House No. ${gig.houseNo}, ${venue.address}`, ticketList.join("\n"))
-       }  res.status(201).send(`List sent to ${email}`)
+       }  res.status(201).send(`List sent to / Liste gesendet an ${email}`)
     } catch (e) {
         res.status(400).send(e)
     }
@@ -226,7 +226,7 @@ router.get('/gigs_paypal_list_dashboard/:id', authUser, async (req, res) => {
  router.post('/gigs_list_email',  authVendor, async (req, res) => {
     try {
         buildEmailExcelList(req.user.email, req.user._id, req.user.name)
-       res.status(201).send(`List sent to ${req.user.email}`)
+       res.status(201).send(`List sent to / Liste gesendet an ${req.user.email}`)
     } catch (e) {
         res.status(400).send(e)
     }
@@ -235,7 +235,7 @@ router.get('/gigs_paypal_list_dashboard/:id', authUser, async (req, res) => {
 router.post('/gigs_list_email/paypal',  authUser, async (req, res) => {
     try {
         buildEmailExcelList(req.user.email, "paypal", "PayPal")
-       res.status(201).send(`List sent to ${req.user.email}`)
+       res.status(201).send(`List sent to / Liste gesendet an ${req.user.email}`)
     } catch (e) {
         res.status(400).send(e)
     }
@@ -248,7 +248,7 @@ router.post('/gigs_list_email/:id',  authUser, async (req, res) => {
             return res.status(404).send()
         }
         buildEmailExcelList(req.user.email, req.params.id, vendor.name)
-       res.status(201).send(`List sent to ${req.user.email}`)
+       res.status(201).send(`List sent to / Liste gesendet an ${req.user.email}`)
     } catch (e) {
         res.status(400).send(e)
     }
@@ -258,7 +258,7 @@ const buildEmailExcelList =  async (email, vendorId, vendorName)  => {
     const gigs = await Gig.find({})
     var workbook = new excel.Workbook();
     workbook.writeP = util.promisify(workbook.write)
-    var worksheet = workbook.addWorksheet('Tickets sold by ' + vendorName);
+    var worksheet = workbook.addWorksheet('Tickets sold by / verkauft von ' + vendorName);
 
     var style = workbook.createStyle({
         font: {
