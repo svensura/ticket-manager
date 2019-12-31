@@ -46,15 +46,13 @@ router.get('/gigs', async (req, res) => {
     }
 })
 
-router.get('/gigs_tickestLeft/:houseNo', async (req, res) => {
+router.get('/gigs_ticketsLeft/:houseNo', async (req, res) => {
     console.log('HIT')
     try {
         const houseNo = req.params.houseNo
         const gigs = await Gig.find({ houseNo: houseNo }).exec()
-        const amount = { "amount": (gigs[0].startSeats) - (gigs[0].soldSeats)}
-        console.log("AMOUNT", amount)
-
-        res.send(amount)
+        const amount = { "amount": ((gigs[0].startSeats) - (gigs[0].soldSeats)).toString()}
+        res.send(JSON.stringify(amount))
     } catch (e) {
         res.status(500).send()
     }
