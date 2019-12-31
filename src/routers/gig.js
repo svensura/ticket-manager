@@ -46,7 +46,7 @@ router.get('/gigs', async (req, res) => {
     }
 })
 
-router.get('/gigsFreeSeats/:houseNo', async (req, res) => {
+router.get('/gigs_tickestLeft/:houseNo', async (req, res) => {
     console.log('HIT')
     try {
         const houseNo = req.params.houseNo
