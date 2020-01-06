@@ -75,6 +75,7 @@ router.patch('/venues/:id', authUser, async (req, res) => {
         const venue = await Venue.findById(req.params.id)
 
         updates.forEach((update) => venue[update] = req.body[update])
+        console.log('TRY GEOCODE')
         
         await geocode.geocodeAddress(venue.address, async (errorMessage, results) => {
             if (errorMessage){
