@@ -66,7 +66,7 @@ const gigSchema = new mongoose.Schema({
         default: 0
     },
     vendorTickets: [{
-        vendor: {
+        vendorName: {
             type: String,
             required: true
         },
@@ -97,9 +97,10 @@ gigSchema.methods.generateVendorTicket = async function (authorization, amount, 
         const vendorToken = authorization.split(' ');
         const decoded = jwt.verify(vendorToken[1], secret);
         const vendor = await User.findById(decoded)
+        const vendorName = vendor.name
         const gig = this
         const date = new Date
-        gig.vendorTickets = gig.vendorTickets.concat({ vendor, date, amount })
+        gig.vendorTickets = gig.vendorTickets.concat({ vendorName, date, amount })
         try {
             await gig.save()
         } catch (e) {

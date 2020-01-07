@@ -6,6 +6,7 @@ const actionLog = require('../helper/actionLog')
 const router = new express.Router()
 
 router.post('/users', authUser, async (req, res) => {
+    console.log('HIT')
     const user = new User(req.body)
     try {
 

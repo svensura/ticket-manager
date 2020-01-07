@@ -7,8 +7,8 @@ const fs = require("fs");
 
 
 
-const mailSend = (email, subject, message) => {
-pathToAttachment = `${__dirname}/../../sellingReport.xlsx`;
+const mailSend = (email, subject, message, attachmentFile) => {
+pathToAttachment = `${__dirname}/../../${attachmentFile}`;
 attachment = fs.readFileSync(pathToAttachment).toString("base64");
 console.log('SEND TO ', email, subject, message)
 sgMail.send({
@@ -20,7 +20,7 @@ sgMail.send({
     attachments: [
         {
         content: attachment,
-        filename: "sellingReport.xlsx",
+        filename: `${attachmentFile}`,
         type: "application/xlsx",
         disposition: "attachment"
         }

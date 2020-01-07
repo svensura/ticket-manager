@@ -79,7 +79,7 @@ router.get('/gigs/:id',  async (req, res) => {
 // Purchase by vendor
 router.patch('/gigs_buy/:id', authVendor, async (req, res) => {
     const _id = req.params.id
-
+    
    try {
         const gig = await Gig.findById(_id)
         const amount = parseInt(req.body.amount)
@@ -98,8 +98,9 @@ router.patch('/gigs_buy/:id', authVendor, async (req, res) => {
         } else {
             actionLog(`${req.body.amount} Ticket(s) paypalled by ${req.body.buyer}`, undefined, gig, undefined)
         }
-        const venue = await Venue.findById(gig.venue)
+        
         if (gig.Venue && gig.startSeats - gig.soldSeats == 0) {
+            const venue = await Venue.findById(gig.venue)
             mailSend(venue.contact.email, 'AUSVERKAUFT!', `Hallo ${venue.contact.name}, die Grosse-Kiesau-Literaturnacht-Veranstaltung "${gig.title}" ist ausverkauft!`)
        }
 
@@ -236,39 +237,44 @@ router.get('/gigs_paypal_list_dashboard/:id', authUser, async (req, res) => {
      }
  })
 
- router.post('/gigs_list_email',  authVendor, async (req, res) => {
+//  router.post('/gigs_list_email',  authVendor, async (req, res) => {
+//     try {
+//         buildEmailExcelList(req.user.email, req.user._id, req.user.name)
+//        res.status(201).send(`List sent to / Liste gesendet an ${req.user.email}`)
+//     } catch (e) {
+//         res.status(400).send(e)
+//     }
+// })
+
+router.post('/gigs_list_email_total',  authUser, async (req, res) => {
+    var users
     try {
-        buildEmailExcelList(req.user.email, req.user._id, req.user.name)
-       res.status(201).send(`List sent to / Liste gesendet an ${req.user.email}`)
+        users = await User.find({ "vendor" : true})
+        users.forEach(user => {
+            buildEmailExcelList(req.user.email, `${user.name}`)
+        })
+        buildEmailExcelList(req.user.email, `PayPal`)
+        res.status(201).send(`Lists sent to / Listen gesendet an ${req.user.email}`)
     } catch (e) {
-        res.status(400).send(e)
+        res.status(500).send()
     }
 })
 
-router.post('/gigs_list_email/paypal',  authUser, async (req, res) => {
+router.post('/gigs_list_email_me',  authVendor, async (req, res) => {
     try {
-        buildEmailExcelList(req.user.email, "paypal", "PayPal")
-       res.status(201).send(`List sent to / Liste gesendet an ${req.user.email}`)
-    } catch (e) {
-        res.status(400).send(e)
-    }
-})
-
-router.post('/gigs_list_email/:id',  authUser, async (req, res) => {
-    try {
-        const vendor = await User.findById(req.params.id)
+        const vendor = await User.findById(req.user.id)
        if (!vendor) {
             return res.status(404).send()
         }
-        buildEmailExcelList(req.user.email, req.params.id, vendor.name)
+        buildEmailExcelList(req.user.email, vendor.name)
        res.status(201).send(`List sent to / Liste gesendet an ${req.user.email}`)
     } catch (e) {
         res.status(400).send(e)
     }
 })
 
-const buildEmailExcelList =  async (email, vendorId, vendorName)  => {
-    const gigs = await Gig.find({})
+const buildEmailExcelList =  async (email, vendorName)  => {
+    
     var workbook = new excel.Workbook();
     workbook.writeP = util.promisify(workbook.write)
     var worksheet = workbook.addWorksheet('Tickets sold by / verkauft von ' + vendorName);
@@ -279,26 +285,30 @@ const buildEmailExcelList =  async (email, vendorId, vendorName)  => {
           size: 12
         },
         numberFormat: '€#,##0.00; (€#,##0.00); -'
-      });
+    });
 
 
-    worksheet.cell(1,1).string('House No.')
-    worksheet.cell(1,2).string('Gig')
-    worksheet.cell(1,3).string('Sold tickets')
-    worksheet.cell(1,4).string('Ticket fee')
-    worksheet.cell(1,5).string('Total')
-    
+    worksheet.cell(1,1).string('Haus Nr.')
+    worksheet.cell(1,2).string('Lesung')
+    worksheet.cell(1,3).string('verkaufte Tickets')
+    worksheet.cell(1,4).string('Ticket-Preis')
+    worksheet.cell(1,5).string('Gesamt')
+    const gigs = await Gig.find({})
+
+
+
     var i = 2
     gigs.forEach(gig => {
         worksheet.cell(i,1).number(gig.houseNo);
         worksheet.cell(i,2).string(gig.title)
         var amount = 0
-        if (vendorId == "paypal") {
+        if (vendorName == "PayPal") {
             amount = gig.paypalTickets.length
         } else {
-            gig.vendorTickets.forEach(vendorTicket => {
-                if (vendorTicket.vendor._id = vendorId) {
-                     amount += vendorTicket.amount
+            var tickets = gig.vendorTickets
+            tickets.forEach(ticket => {
+                if (ticket.vendorName == vendorName) {
+                     amount += ticket.amount
                  }
             })
         }
@@ -308,9 +318,9 @@ const buildEmailExcelList =  async (email, vendorId, vendorName)  => {
         worksheet.cell(i,5).number(parseFloat(gig.feeEur) * amount).style(style);
         i++
     });
-    await workbook.writeP('sellingReport.xlsx')
+    await workbook.writeP(`sellingReport${vendorName}.xlsx`)
     if (email) {
-       mailAttachSend(email, `Tickets sold by ${vendorName}`,"")
+       mailAttachSend(email, `Tickets sold by ${vendorName}`, "", `sellingReport${vendorName}.xlsx`)
     }  
 }
 
