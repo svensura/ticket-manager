@@ -90,7 +90,6 @@ router.patch('/gigs_buy/:id', authVendor, async (req, res) => {
             return res.status(404).send()
         }
         
-        gig['soldSeats'] += amount
         await gig.generateVendorTicket(req.headers.authorization, amount, process.env.JWT_SECRET + "VENDOR")
         await gig.save()
         if (req.headers.authorization){

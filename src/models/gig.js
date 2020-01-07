@@ -87,8 +87,12 @@ gigSchema.methods.generatePaypalTicket = async function (buyer) {
     const gig = this
     const date = new Date
     gig.paypalTickets = gig.paypalTickets.concat({ buyer, date })
-    await gig.save()
-
+    gig.soldSeats ++
+    try {
+        await gig.save()
+    } catch (e) {
+        throw new Error(e)
+    }
     return buyer
 }
 
@@ -101,6 +105,7 @@ gigSchema.methods.generateVendorTicket = async function (authorization, amount, 
         const gig = this
         const date = new Date
         gig.vendorTickets = gig.vendorTickets.concat({ vendorName, date, amount })
+        gig.soldSeats += amount
         try {
             await gig.save()
         } catch (e) {
