@@ -137,7 +137,7 @@ router.patch('/gigs_buy/:id', authVendor, async (req, res) => {
 
 router.patch('/gigs/:id', authUser, async (req, res) => {
     const updates = Object.keys(req.body)
-    const allowedUpdates = ['houseNo', 'title', 'performer', 'venue', 'feeEur', 'startSeats']
+    const allowedUpdates = ['houseNo', 'title', 'performer', 'venue', 'feeEur', 'feePPEur', 'startSeats']
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
 
     if (!isValidOperation) {
