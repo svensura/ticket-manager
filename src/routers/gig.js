@@ -72,7 +72,7 @@ router.get('/gigs_feePPEur/:houseNo', async (req, res) => {
     try {
         const houseNo = req.params.houseNo
         const gigs = await Gig.find({ houseNo: houseNo }).exec()
-        const feePPEur = { "feePPEur": gigs[0].feeEur.toString()}
+        const feePPEur = { "feePPEur": gigs[0].feePPEur.toString()}
         res.send(JSON.stringify(feePPEur))
     } catch (e) {
         res.status(500).send()
