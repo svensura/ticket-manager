@@ -313,8 +313,13 @@ const buildEmailExcelList =  async (email, vendorName)  => {
         }
 
         worksheet.cell(i,3).number(amount)
-        worksheet.cell(i,4).number(parseFloat(gig.feeEur)).style(style);
-        worksheet.cell(i,5).number(parseFloat(gig.feeEur) * amount).style(style);
+        if (vendorName == "PayPal") {
+            worksheet.cell(i,4).number(parseFloat(gig.feePPEur)).style(style);
+            worksheet.cell(i,5).number(parseFloat(gig.feePPEur) * amount).style(style);
+        } else {
+            worksheet.cell(i,4).number(parseFloat(gig.feeEur)).style(style);
+            worksheet.cell(i,5).number(parseFloat(gig.feeEur) * amount).style(style);
+        }
         i++
     });
     await workbook.writeP(`sellingReport${vendorName}.xlsx`)
