@@ -47,7 +47,6 @@ router.get('/gigs', async (req, res) => {
 })
 
 router.get('/gigs_ticketsLeft/:houseNo', async (req, res) => {
-    console.log('HIT')
     try {
         const houseNo = req.params.houseNo
         const gigs = await Gig.find({ houseNo: houseNo }).exec()
@@ -58,6 +57,27 @@ router.get('/gigs_ticketsLeft/:houseNo', async (req, res) => {
     }
 })
 
+router.get('/gigs_feeEur/:houseNo', async (req, res) => {
+    try {
+        const houseNo = req.params.houseNo
+        const gigs = await Gig.find({ houseNo: houseNo }).exec()
+        const feeEur = { "feeEur": gigs[0].feeEur.toString()}
+        res.send(JSON.stringify(feeEur))
+    } catch (e) {
+        res.status(500).send()
+    }
+})
+
+router.get('/gigs_feePPEur/:houseNo', async (req, res) => {
+    try {
+        const houseNo = req.params.houseNo
+        const gigs = await Gig.find({ houseNo: houseNo }).exec()
+        const feeEur = { "feePPEur": gigs[0].feeEur.toString()}
+        res.send(JSON.stringify(feePPEur))
+    } catch (e) {
+        res.status(500).send()
+    }
+})
 
 
 router.get('/gigs/:id',  async (req, res) => {
