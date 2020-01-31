@@ -236,7 +236,7 @@ router.post('/dashboard_paypal_list_email/:id',  authUser, async (req, res) => {
             ticketList = ['No tickets sold']
         }
         if (email) {
-            await mailSend(email, `Tickets sold with Paypal for House No. ${gig.houseNo}, ${venue.address}`, ticketList.join("\n"))
+            await mailSend(email, `Tickets verkauft mit Paypal für Haus Nr. ${gig.houseNo}, ${venue.address}`, ticketList.join("\n"))
        }  res.status(201).send(`List sent to / Liste gesendet an ${email}`)
     } catch (e) {
         res.status(400).send(e)
