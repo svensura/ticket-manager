@@ -96,8 +96,8 @@ router.get('/gigs/:id',  async (req, res) => {
     }
 })
 
-// Purchase by vendor
-router.patch('/gigs_buy/:id', authVendor, async (req, res) => {
+// Purchase by vendor or paypal
+router.patch('/gigs_buy/:id', async (req, res) => {
     const _id = req.params.id
     
    try {
