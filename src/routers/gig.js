@@ -219,6 +219,7 @@ router.post('/gigs_paypal_list_email/:id',  authUser, async (req, res) => {
             ticketList = ['No tickets sold']
         }
         if (email) {
+            await mailSend(email, `Große-Kiesau-Literaturnacht`, `Lieber Gastgeber, die folgende email enthält eine Liste der mit PayPal verkauften Tickets für Ihr Haus. Jeder Eintrag steht für ein Ticket. Der Gast identifiziert sich anhand des im Eintrag buyer: genannten (email-)Namens`)
             await mailSend(email, `Tickets verkauft mit Paypal für Haus Nr. ${gig.houseNo}, ${venue.address}:`, ticketList.join("\n"))
        }  res.status(201).send(`List sent to / Liste gesendet an ${email}`)
     } catch (e) {
