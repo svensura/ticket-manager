@@ -193,14 +193,15 @@ router.delete('/gigs/:id', authUser, async (req, res) => {
     }
 })
 
-// Purchase by PayPal
+// Purchase by PayPal, heck for avoiding multiple sellings with one purchase
 router.patch('/gigs_ticket/:id',  async (req, res) => {
     const buyer = req.body.buyer
     const amount = parseInt(req.body.amount)
+    const check = req.body.check
     try {
         const gig = await Gig.findById(req.params.id)
         for (var i = 0; i < amount; i++ ){
-            await gig.generatePaypalTicket(buyer)
+            await gig.generatePaypalTicket(buyer, check + i.toString())
             res.status(201).send()
         }
         if (validator.isEmail(buyer)) {

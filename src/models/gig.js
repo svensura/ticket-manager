@@ -101,12 +101,16 @@ const gigSchema = new mongoose.Schema({
             type: String,
             required: true
         },
-        date: Date
+        date: Date,
+        check: {
+            type: String,
+            unique: true
+        }
     }]
     
 })
 
-gigSchema.methods.generatePaypalTicket = async function (buyer) {
+gigSchema.methods.generatePaypalTicket = async function (buyer, check) {
     const gig = this
     const date = new Date
     gig.paypalTickets = gig.paypalTickets.concat({ buyer, date })
