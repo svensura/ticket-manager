@@ -13,12 +13,6 @@ services:
       WAIT_HOSTS: mongo:27017
     env_file:
       - ./config/doc.env
-  nginx:
-    image: nginx:1.19
-    ports:
-      - "80:80"
-    volumes:
-      - ./web/public/html:usr/share/nginx/html
   mongo:
     container_name: mongo
     image: mongo
