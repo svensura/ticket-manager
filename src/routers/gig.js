@@ -18,6 +18,7 @@ const util = require('util')
 
 
 router.post('/gigs', authUser, async (req, res) => {
+    console.log("GET GIGS AUTH HIT!")
     const gig = new Gig(req.body)
     const venue = await Venue.findById(req.body.venue)
     const seats = venue.seats
@@ -38,6 +39,7 @@ router.post('/gigs', authUser, async (req, res) => {
 
 
 router.get('/gigs', async (req, res) => {
+    console.log("GET GIGS HIT!")
     try {
         const gigs = await Gig.find({}).populate('venue').exec()
         res.send(gigs)

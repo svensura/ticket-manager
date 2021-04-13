@@ -5,24 +5,40 @@ const authVendor = require('../middleware/authVendor')
 const actionLog = require('../helper/actionLog')
 const router = new express.Router()
 
-router.post('/users', authUser, async (req, res) => {
-    console.log('HIT')
+router.post('/users',  async (req, res) => {
+    console.log('POST USER HIT')
     const user = new User(req.body)
     try {
 
         await user.save()
-        actionLog(`${user.vendor?"Vendor":"User"} created`, req.headers.authorization, user, process.env.JWT_SECRET)
+        console.log(user)
+        //actionLog(`${user.vendor?"Vendor":"User"} created`, req.headers.authorization, user, 'thisisasecretformyapp')
         const token = await user.generateAuthToken()
+        console.log(token)
         res.status(201).send({ user, token })
     } catch (e) {
         res.status(400).send(e)
     }
 })
 
+// router.post('/users', authUser, async (req, res) => {
+//     console.log('HIT')
+//     const user = new User(req.body)
+//     try {
+
+//         await user.save()
+//         actionLog(`${user.vendor?"Vendor":"User"} created`, req.headers.authorization, user, 'thisisasecretformyapp')
+//         const token = await user.generateAuthToken()
+//         res.status(201).send({ user, token })
+//     } catch (e) {
+//         res.status(400).send(e)
+//     }
+// })
+
 
 
 router.post('/users/login', async (req, res) => {
-    
+    console.log('POST LOGIN HIT')
     try {
         const user = await User.findByCredentials(req.body.email, req.body.password)
         const token = await user.generateAuthToken()
@@ -68,12 +84,27 @@ router.post('/users/logoutAll', authUser, async (req, res) => {
     }
 })
 
+// router.get('/users',  async (req, res) => {
+//     console.log('GET USERS HIT')
+//     try {
+//         const users = await User.find({})
+//         res.send(users)
+//     } catch (e) {
+//         res.status(500).send()
+  
+  
+//     }
+// })
+
 router.get('/users', authUser, async (req, res) => {
+    console.log('GET USERS AUTH HIT')
     try {
         const users = await User.find({})
         res.send(users)
     } catch (e) {
         res.status(500).send()
+  
+  
     }
 })
 

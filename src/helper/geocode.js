@@ -3,9 +3,10 @@ const request = require('request');
 var geocodeAddress = (address, callback) => {
     console.log(address)
     request({
-    //url: `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=AIzaSyBAi5ZfCgmWyr31KbH9XVFkExw5KP8NOCk`,
-    url: `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(address)}&key=434e6e07bdc04dc28e0b1fe641f10657`,
-   json: true
+        //url: `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=AIzaSyBAi5ZfCgmWyr31KbH9XVFkExw5KP8NOCk`,
+        //url: `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(address)}&key=434e6e07bdc04dc28e0b1fe641f10657`,
+        url: 'https://api.opencagedata.com/geocode/v1/json?q=' + encodeURIComponent(address) + '&key=99e656b273e342d8ab64d47ac60718d1' ,
+        json: true
     }, (error, response, body) => {
         console.log('REQUEST', body)
         console.log('STATUS', body.status)

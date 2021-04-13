@@ -11,22 +11,22 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@sendgrid/mail": "^6.4.0",
+    "@sendgrid/mail": "^6.5.5",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "excel4node": "^1.7.2",
-    "express": "^4.16.4",
+    "express": "~4.16.1",
     "fs": "0.0.1-security",
-    "jsonwebtoken": "^8.4.0",
-    "mongodb": "^3.3.5",
-    "mongoose": "^5.7.13",
+    "jsonwebtoken": "^8.5.1",
+    "mongodb": "^3.6.4",
+    "mongoose": "^5.11.15",
     "paypal-rest-sdk": "^1.8.1",
-    "request": "^2.88.0",
-    "util": "^0.12.1",
-    "validator": "^10.9.0"
+    "request": "^2.88.2",
+    "util": "^0.12.3",
+    "validator": "^10.11.0"
   },
   "devDependencies": {
-    "nodemon": "^1.18.9",
-    "env-cmd": "^8.0.2"
+    "env-cmd": "^8.0.2",
+    "nodemon": "^1.19.4"
   }
 }
