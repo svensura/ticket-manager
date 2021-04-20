@@ -3,8 +3,7 @@ const cors = require('cors')
 
 require('./db/mongoose')
 const userRouter = require('./routers/user')
-const venueRouter = require('./routers/venue')
-const gigRouter = require('./routers/gig')
+const studentRouter = require('./routers/student')
 
 const app = express()
 const port = process.env.PORT
@@ -28,8 +27,8 @@ app.use(cors())
 
 app.use(express.json())
 app.use(userRouter)
-app.use(venueRouter)
-app.use(gigRouter)
+app.use(studentRouter)
+
 
 app.listen(port, () => {
     console.log('Server is up on port ' + port)

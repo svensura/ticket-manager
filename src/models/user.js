@@ -66,12 +66,12 @@ userSchema.methods.toJSON = function () {
 userSchema.methods.generateAuthToken = async function () {
     const user = this
     if (!user.vendor) {
-        const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET)
+        const token = jwt.sign({ _id: user._id.toString() }, 'thisisasecretformyapp')
         user.tokens = user.tokens.concat({ token })
         await user.save()
         return token
     } else {
-        const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET + "VENDOR")
+        const token = jwt.sign({ _id: user._id.toString() }, 'thisisasecretformyapp' + "VENDOR")
         user.tokens = user.tokens.concat({ token })
         await user.save()
         return token
