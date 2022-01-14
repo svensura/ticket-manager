@@ -1,0 +1,32 @@
+{
+  "name": "ticket-manager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "env-cmd ./config/dev.env nodemon src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@sendgrid/mail": "^6.5.5",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "excel4node": "^1.7.2",
+    "express": "~4.16.1",
+    "fs": "0.0.1-security",
+    "jsonwebtoken": "^8.5.1",
+    "mongodb": "^3.6.4",
+    "mongoose": "^6.1.6",
+    "paypal-rest-sdk": "^1.8.1",
+    "request": "^2.88.2",
+    "util": "^0.12.3",
+    "validator": "^13.7.0"
+  },
+  "devDependencies": {
+    "env-cmd": "^8.0.2",
+    "nodemon": "^2.0.15"
+  }
+}
