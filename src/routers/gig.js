@@ -7,6 +7,7 @@ const authUser = require('../middleware/authUser')
 const authVendor = require('../middleware/authVendor')
 const actionLog = require('../helper/actionLog')
 const mailSend = require('../helper/mailSend')
+const email = require('../helper/email')
 const mailAttachSend = require('../helper/mailAttachSend')
 const router = new express.Router()
 const validator = require('validator')
@@ -364,6 +365,20 @@ const buildEmailExcelList =  async (email, vendorName)  => {
 }
 
 
+router.post('/gigs_email',  authUser, async (req, res) => {
+    console.log('EMPFAENGER: ', req.body.contact.email)
+    try {
+        const user = await User.findById(req.user.id)
+        if (user) {
+            console.log('ABSENDER: ', user.email)
+            res.status(200).send('success')
+            email(req.body.contact.email, user, "TEST_TEST","sellingReportLangenkamp.xlsx")
+        }
+    } catch (e) {
+        console.log('FEHLER! ')
+        res.status(400).send(e)
+    }
+})
 
 
 module.exports = router
