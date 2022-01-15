@@ -98,16 +98,6 @@ const emailSend = async (email, subject, message, attachmentFile)  => {
         }
     })       
 
-
-
-  
-
-    
-
-    
-
-
-
 }
 
 module.exports = emailSend

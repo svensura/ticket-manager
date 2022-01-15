@@ -360,7 +360,7 @@ const buildEmailExcelList =  async (email, vendorName)  => {
     });
     await workbook.writeP(`sellingReport${vendorName}.xlsx`)
     if (email) {
-       mailAttachSend(email, `Tickets sold by ${vendorName}`, "", `sellingReport${vendorName}.xlsx`)
+       mailAttachSend(email, `Tickets sold by ${vendorName}`, "LG", `sellingReport${vendorName}.xlsx`)
     }  
 }
 
