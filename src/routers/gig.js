@@ -208,7 +208,7 @@ router.patch('/gigs_ticket/:id',  async (req, res) => {
             res.status(201).send()
         }
         if (validator.isEmail(buyer)) {
-            await mailSend(buyer, 'Tickets für Große Kiesau Literaturnacht', `Hallo, Sie haben ${amount} Ticket(s) für Haus Nr. ${gig.houseNo} gekauft. Mehr Information zu dieser Veranstaltung auf www.grosse-kiesau.de.`)
+            await mailSend(buyer, 'Tickets für Große Kiesau Literaturnacht', `Hallo, Sie haben ${amount} Ticket(s) für Haus Nr. ${gig.houseNo} gekauft. Mehr aktuelle Informationen zu dieser Veranstaltung auf www.grosse-kiesau.de. Bitte vergewissern Sie sich auf www.große-kiesau.de, dass die Veranstaltung planmässig stattfindet.`)
         }  
     } catch (e) {
         res.status(400).send()
