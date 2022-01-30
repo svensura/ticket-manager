@@ -52,7 +52,10 @@ router.get('/gigs_ticketsLeft/:houseNo', async (req, res) => {
     try {
         const houseNo = req.params.houseNo
         const gigs = await Gig.find({ houseNo: houseNo }).exec()
-        const amount = { "amount": ((gigs[0].startSeats) - (gigs[0].soldSeats)).toString()}
+        const amount = { 
+                        "amount": ((gigs[0].startSeats) - (gigs[0].soldSeats)).toString(),
+                        "cancelled": gigs[0].cancelled
+                    }
         res.send(JSON.stringify(amount))
     } catch (e) {
         res.status(500).send()
@@ -105,7 +108,7 @@ router.patch('/gigs_buy/:id', async (req, res) => {
    try {
         const gig = await Gig.findById(_id)
         const amount = parseInt(req.body.amount)
-        if (!gig || (gig.startSeats - gig.soldSeats - amount < 0)) {
+        if (!gig || (gig.startSeats - gig.soldSeats - amount < 0) || (gig.cancelled)) {
             return res.status(406).send('No or not enough tickets available! - Keine oder zu wenig TIckets erhältlich!')
         }  
         if (!gig) {
@@ -139,7 +142,7 @@ router.patch('/gigs_buy/:id', async (req, res) => {
 
 router.patch('/gigs/:id', authUser, async (req, res) => {
     const updates = Object.keys(req.body)
-    const allowedUpdates = ['houseNo', 'title', 'performer', 'venue', 'feeEur', 'feePPEur', 'startSeats']
+    const allowedUpdates = ['houseNo', 'title', 'performer', 'venue', 'feeEur', 'feePPEur', 'startSeats', 'cancelled']
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
 
     if (!isValidOperation) {
@@ -193,7 +196,7 @@ router.delete('/gigs/:id', authUser, async (req, res) => {
     }
 })
 
-// Purchase by PayPal, heck for avoiding multiple sellings with one purchase
+// Purchase by PayPal, check for avoiding multiple sellings with one purchase
 router.patch('/gigs_ticket/:id',  async (req, res) => {
     const buyer = req.body.buyer
     const amount = parseInt(req.body.amount)
