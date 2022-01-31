@@ -53,7 +53,19 @@ router.get('/gigs_ticketsLeft/:houseNo', async (req, res) => {
         const houseNo = req.params.houseNo
         const gigs = await Gig.find({ houseNo: houseNo }).exec()
         const amount = { 
-                        "amount": ((gigs[0].startSeats) - (gigs[0].soldSeats)).toString(),
+                        "amount": gigs[0].cancelled ? 0 : ((gigs[0].startSeats) - (gigs[0].soldSeats)).toString()
+                    }
+        res.send(JSON.stringify(amount))
+    } catch (e) {
+        res.status(500).send()
+    }
+})
+
+router.get('/gigs_cancelled/:houseNo', async (req, res) => {
+    try {
+        const houseNo = req.params.houseNo
+        const gigs = await Gig.find({ houseNo: houseNo }).exec()
+        const cancelled = { 
                         "cancelled": gigs[0].cancelled
                     }
         res.send(JSON.stringify(amount))
