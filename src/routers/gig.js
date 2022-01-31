@@ -68,7 +68,7 @@ router.get('/gigs_cancelled/:houseNo', async (req, res) => {
         const cancelled = { 
                         "cancelled": gigs[0].cancelled
                     }
-        res.send(JSON.stringify(amount))
+        res.send(JSON.stringify(cancelled))
     } catch (e) {
         res.status(500).send()
     }
