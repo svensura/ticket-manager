@@ -120,10 +120,10 @@ router.patch('/gigs_buy/:id', async (req, res) => {
    try {
         const gig = await Gig.findById(_id)
         const amount = parseInt(req.body.amount)
-        if (!gig || (gig.startSeats - gig.soldSeats - amount < 0) || (gig.cancelled)) {
+        if (amount > 0 && ((gig.startSeats - gig.soldSeats - amount < 0) || (gig.cancelled))) {
             return res.status(406).send('No or not enough tickets available! - Keine oder zu wenig TIckets erhältlich!')
         }  
-        if (!gig) {
+        if (!gig || amount == 0) {
             return res.status(404).send()
         }
         
