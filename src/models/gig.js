@@ -58,6 +58,29 @@ const gigSchema = new mongoose.Schema({
             }
         }
     },
+    feeStudentEur: {
+        type: String,
+        validate(value) {
+            if (!validator.isCurrency(value, {
+                symbol: '€',
+                require_symbol: false,
+                allow_space_after_symbol: false,
+                symbol_after_digits: false,
+                allow_negatives: false,
+                parens_for_negatives: false,
+                negative_sign_before_digits: false,
+                negative_sign_after_digits: false,
+                allow_negative_sign_placeholder: false,
+                thousands_separator: ',', decimal_separator: '.',
+                allow_decimal: true,
+                require_decimal: false,
+                digits_after_decimal: [2],
+                allow_space_after_digits: false
+            })) {
+                throw new Error('Wrong Format')
+            }
+        }
+    },
     feePPEur: {
         type: String,
         validate(value) {
@@ -89,6 +112,14 @@ const gigSchema = new mongoose.Schema({
         default: 0
     },
     vendorTickets: [{
+        vendorName: {
+            type: String,
+            required: true
+        },
+        amount: Number,
+        date: Date
+    }],
+    studentTickets: [{
         vendorName: {
             type: String,
             required: true
@@ -140,7 +171,7 @@ gigSchema.methods.generatePaypalTicket = async function (buyer, check) {
     return buyer
 }
 
-gigSchema.methods.generateVendorTicket = async function (authorization, amount, secret) {
+gigSchema.methods.generateVendorTicket = async function (authorization, amount, student, secret) {
     try {
         const vendorToken = authorization.split(' ');
         const decoded = jwt.verify(vendorToken[1], secret);
@@ -148,7 +179,7 @@ gigSchema.methods.generateVendorTicket = async function (authorization, amount, 
         const vendorName = vendor.name
         const gig = this
         const date = new Date
-        gig.vendorTickets = gig.vendorTickets.concat({ vendorName, date, amount })
+        gig.vendorTickets = gig.vendorTickets.concat({ vendorName, date, amount, student })
         gig.soldSeats += amount
         try {
             await gig.save()

@@ -85,6 +85,17 @@ router.get('/gigs_feeEur/:houseNo', async (req, res) => {
     }
 })
 
+router.get('/gigs_feeStudentEur/:houseNo', async (req, res) => {
+    try {
+        const houseNo = req.params.houseNo
+        const gigs = await Gig.find({ houseNo: houseNo }).exec()
+        const feeStudentEur = { "feeStudentEur": gigs[0].feeStudentEur.toString()}
+        res.send(JSON.stringify(feeStudentEur))
+    } catch (e) {
+        res.status(500).send()
+    }
+})
+
 router.get('/gigs_feePPEur/:houseNo', async (req, res) => {
     try {
         const houseNo = req.params.houseNo
@@ -113,13 +124,14 @@ router.get('/gigs/:id',  async (req, res) => {
     }
 })
 
-// Purchase by vendor or paypal
+// Purchase by vendor 
 router.patch('/gigs_buy/:id', async (req, res) => {
     const _id = req.params.id
     
    try {
         const gig = await Gig.findById(_id)
         const amount = parseInt(req.body.amount)
+        const student = false
         if (amount > 0 && ((gig.startSeats - gig.soldSeats - amount < 0) || (gig.cancelled))) {
             return res.status(406).send('No or not enough tickets available! - Keine oder zu wenig TIckets erhältlich!')
         }  
@@ -127,7 +139,42 @@ router.patch('/gigs_buy/:id', async (req, res) => {
             return res.status(404).send()
         }
         
-        await gig.generateVendorTicket(req.headers.authorization, amount, process.env.JWT_SECRET + "VENDOR")
+        await gig.generateVendorTicket(req.headers.authorization, amount, student, process.env.JWT_SECRET + "VENDOR")
+        await gig.save()
+        if (req.headers.authorization){
+            actionLog(`${Math.abs(amount)} Ticket(s) ${amount > 0 ? "sold" : "refunded"} by Vendor`, req.headers.authorization, gig, process.env.JWT_SECRET + "VENDOR")
+        } else {
+            actionLog(`${req.body.amount} Ticket(s) paypalled by ${req.body.buyer}`, undefined, gig, undefined)
+        }
+        
+        if (gig.Venue && gig.startSeats - gig.soldSeats == 0) {
+            const venue = await Venue.findById(gig.venue)
+            mailSend(venue.contact.email, 'AUSVERKAUFT!', `Hallo ${venue.contact.name}, die Grosse-Kiesau-Literaturnacht-Veranstaltung "${gig.title}" ist ausverkauft!`)
+       }
+
+        res.send(gig)
+
+    } catch (e) {
+        res.status(500).send()
+    }
+})
+
+
+router.patch('/gigs_buyStudent/:id', async (req, res) => {
+    const _id = req.params.id
+    
+   try {
+        const gig = await Gig.findById(_id)
+        const amount = parseInt(req.body.amount)
+        const student = true
+        if (amount > 0 && ((gig.startSeats - gig.soldSeats - amount < 0) || (gig.cancelled))) {
+            return res.status(406).send('No or not enough tickets available! - Keine oder zu wenig TIckets erhältlich!')
+        }  
+        if (!gig || amount == 0) {
+            return res.status(404).send()
+        }
+        
+        await gig.generateVendorTicket(req.headers.authorization, amount, student, process.env.JWT_SECRET + "VENDOR")
         await gig.save()
         if (req.headers.authorization){
             actionLog(`${Math.abs(amount)} Ticket(s) ${amount > 0 ? "sold" : "refunded"} by Vendor`, req.headers.authorization, gig, process.env.JWT_SECRET + "VENDOR")
@@ -149,12 +196,9 @@ router.patch('/gigs_buy/:id', async (req, res) => {
 
 
 
-
-
-
 router.patch('/gigs/:id', authUser, async (req, res) => {
     const updates = Object.keys(req.body)
-    const allowedUpdates = ['houseNo', 'title', 'performer', 'venue', 'feeEur', 'feePPEur', 'startSeats', 'cancelled']
+    const allowedUpdates = ['houseNo', 'title', 'performer', 'venue', 'feeEur', 'feeStudentEur', 'feePPEur', 'startSeats', 'cancelled']
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
 
     if (!isValidOperation) {
@@ -340,9 +384,12 @@ const buildEmailExcelList =  async (email, vendorName)  => {
 
     worksheet.cell(1,1).string('Haus Nr.')
     worksheet.cell(1,2).string('Lesung')
-    worksheet.cell(1,3).string('verkaufte Tickets')
-    worksheet.cell(1,4).string('Ticket-Preis')
-    worksheet.cell(1,5).string('Gesamt')
+    worksheet.cell(1,3).string('Ticket-Voll')
+    worksheet.cell(1,4).string('Preis-Voll')
+    worksheet.cell(1,5).string('Ticket-Student')
+    worksheet.cell(1,6).string('Preis-Student')
+    worksheet.cell(1,7).string('Gesamt')
+
     const gigs = await Gig.find({})
 
 
@@ -351,25 +398,34 @@ const buildEmailExcelList =  async (email, vendorName)  => {
     gigs.forEach(gig => {
         worksheet.cell(i,1).number(gig.houseNo);
         worksheet.cell(i,2).string(gig.title)
-        var amount = 0
+        var amountFull = 0
+        var amountHalf = 0
         if (vendorName == "PayPal") {
-            amount = gig.paypalTickets.length
+            amountFull = gig.paypalTickets.length
         } else {
             var tickets = gig.vendorTickets
             tickets.forEach(ticket => {
                 if (ticket.vendorName == vendorName) {
-                     amount += ticket.amount
+                    if(!ticket.student){
+                        amountFull += ticket.amount
+                    } else {
+                        amountHalf += ticket.amount
+                    }
+                     
                  }
             })
         }
 
-        worksheet.cell(i,3).number(amount)
+        worksheet.cell(i,3).number(amountFull)
+        worksheet.cell(i,5).number(amountHalf)
         if (vendorName == "PayPal") {
             worksheet.cell(i,4).number(parseFloat(gig.feePPEur)).style(style);
-            worksheet.cell(i,5).number(parseFloat(gig.feePPEur) * amount).style(style);
+            worksheet.cell(i,6).number(parseFloat(gig.feeEur)).style(style);
+            worksheet.cell(i,7).number(parseFloat(gig.feePPEur) * amountFull).style(style);
         } else {
             worksheet.cell(i,4).number(parseFloat(gig.feeEur)).style(style);
-            worksheet.cell(i,5).number(parseFloat(gig.feeEur) * amount).style(style);
+            worksheet.cell(i,6).number(parseFloat(gig.feeEur)).style(style);
+            worksheet.cell(i,7).number(parseFloat(gig.feeEur) * amountFull + (gig.feeStudentEur) * amountHalf).style(style);
         }
         i++
     });
