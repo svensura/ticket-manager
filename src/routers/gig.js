@@ -390,7 +390,7 @@ const buildEmailExcelList =  async (email, vendorName)  => {
     worksheet.cell(1,6).string('Preis-Student')
     worksheet.cell(1,7).string('Gesamt')
 
-    const gigs = await Gig.find({}).sort({houseNo})
+    const gigs = await Gig.find({}).sort( {houseNo: 1} )
 
 
 
