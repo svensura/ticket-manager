@@ -424,7 +424,7 @@ const buildEmailExcelList =  async (email, vendorName)  => {
             worksheet.cell(i,7).number(parseFloat(gig.feePPEur) * amountFull).style(style);
         } else {
             worksheet.cell(i,4).number(parseFloat(gig.feeEur)).style(style);
-            worksheet.cell(i,6).number(parseFloat(gig.feeEur)).style(style);
+            worksheet.cell(i,6).number(parseFloat(gig.feeStudentEur)).style(style);
             worksheet.cell(i,7).number(parseFloat(gig.feeEur) * amountFull + (gig.feeStudentEur) * amountHalf).style(style);
         }
         i++
