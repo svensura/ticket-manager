@@ -117,15 +117,11 @@ const gigSchema = new mongoose.Schema({
             required: true
         },
         amount: Number,
-        date: Date
-    }],
-    studentTickets: [{
-        vendorName: {
-            type: String,
-            required: true
-        },
-        amount: Number,
-        date: Date
+        date: Date,
+        student: {
+            type: Boolean,
+            default: false
+        }
     }],
     paypalTickets: [{
         buyer: {
