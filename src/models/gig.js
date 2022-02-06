@@ -129,7 +129,10 @@ const gigSchema = new mongoose.Schema({
             required: true
         },
         date: Date,
-        check: String
+        check: {
+            type: String,
+            unique: true
+        },
     }],
     cancelled: {
         type: Boolean,
