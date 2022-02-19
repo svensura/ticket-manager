@@ -81,10 +81,9 @@ const mailAttachSend = async (email, subject, message, attachmentFile)  => {
                 text: message,
                 attachments: [
                   {
-                      attachmentFile,
                       content: data,
-                      contentType:
-                          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                      filename: attachmentFile,
+                      type: "application/vnd.ms-excel"
                   },
               ],
               onError: (e) => console.log(e),
