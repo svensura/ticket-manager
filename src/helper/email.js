@@ -55,7 +55,7 @@ const OAuth2 = google.auth.OAuth2;
 
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  service: "hotmail",
   auth: {
     user: process.env.SENDER_EMAIL,
     pass: process.env.SENDER_EMAIL_PASS

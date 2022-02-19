@@ -1,6 +1,6 @@
 require("dotenv").config();
 // Nodemailer
-const nodemailer = require("nodemailer");
+const nodeoutlook = require('nodejs-nodemailer-outlook')
 
 const path = require('path')
 // FS
@@ -50,13 +50,13 @@ const OAuth2 = google.auth.OAuth2;
 //     return transporter;
 //   };
 
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.SENDER_EMAIL,
-      pass: process.env.SENDER_EMAIL_PASS
-    },
-  });
+  // const transporter = nodeoutlook.createTransport({
+  //   service: "Hotmail",
+  //   auth: {
+  //     user: process.env.SENDER_EMAIL,
+  //     pass: process.env.SENDER_EMAIL_PASS
+  //   },
+  // });
 
 const mailAttachSend = async (email, subject, message, attachmentFile)  => {
 
@@ -71,6 +71,10 @@ const mailAttachSend = async (email, subject, message, attachmentFile)  => {
         }
         if (data) {
             let mailOptions = {
+              auth: {
+                user: process.env.SENDER_EMAIL,
+                pass: process.env.SENDER_EMAIL_PASS
+                },
                 from: process.env.SENDER_EMAIL,
                 to: email,
                 subject: subject,
@@ -83,21 +87,15 @@ const mailAttachSend = async (email, subject, message, attachmentFile)  => {
                           'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                   },
               ],
+              onError: (e) => console.log(e),
+              onSuccess: (i) => console.log(i)
             };
             try {
                 // Get response from the createTransport
                 //let emailTransporter = await createTransporter();
         
                 // Send email
-                transporter.sendMail(mailOptions, function (error, info) {
-                    if (error) {
-                        // failed block
-                        console.log(error);
-                    } else {
-                       // Success block
-                        console.log("Email sent: " + info.response);
-                    }
-                });
+                nodeoutlook.sendEmail(mailOptions);
             } catch (error) {
                 return console.log(error);
             }
