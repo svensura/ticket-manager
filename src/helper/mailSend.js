@@ -7,44 +7,52 @@ const { google } = require("googleapis");
 // Pull out OAuth from googleapis
 const OAuth2 = google.auth.OAuth2;
 
-const createTransporter = async () => {
-    //Connect to the oauth playground
-    console.log('CLIENT_ID: ', process.env.OAUTH_CLIENT_ID)  
-    const oauth2Client = new OAuth2(
-      process.env.OAUTH_CLIENT_ID,
-      process.env.OAUTH_CLIENT_SECRET,
-      "https://developers.google.com/oauthplayground"
-    );
-    console.log('CLIENT: ', oauth2Client)  
-    // Add the refresh token to the Oauth2 connection
-    oauth2Client.setCredentials({
-      refresh_token: process.env.OAUTH_REFRESH_TOKEN,
-    });
+// const createTransporter = async () => {
+//     //Connect to the oauth playground
+//     console.log('CLIENT_ID: ', process.env.OAUTH_CLIENT_ID)  
+//     const oauth2Client = new OAuth2(
+//       process.env.OAUTH_CLIENT_ID,
+//       process.env.OAUTH_CLIENT_SECRET,
+//       "https://developers.google.com/oauthplayground"
+//     );
+//     console.log('CLIENT: ', oauth2Client)  
+//     // Add the refresh token to the Oauth2 connection
+//     oauth2Client.setCredentials({
+//       refresh_token: process.env.OAUTH_REFRESH_TOKEN,
+//     });
   
-    const accessToken = await new Promise((resolve, reject) => {
-      oauth2Client.getAccessToken((err, token) => {
-        if (err) {
-          reject("Failed to create access token : error message(" + err);
-        }
-        resolve(token);
-      });
-    });
+//     const accessToken = await new Promise((resolve, reject) => {
+//       oauth2Client.getAccessToken((err, token) => {
+//         if (err) {
+//           reject("Failed to create access token : error message(" + err);
+//         }
+//         resolve(token);
+//       });
+//     });
   
-    // Authenticating and creating a method to send a mail
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        type: "OAuth2",
-        user: process.env.SENDER_EMAIL,
-        accessToken,
-        clientId: process.env.OAUTH_CLIENT_ID,
-        clientSecret: process.env.OAUTH_CLIENT_SECRET,
-        refreshToken: process.env.OAUTH_REFRESH_TOKEN,
-      },
-    });
+//     // Authenticating and creating a method to send a mail
+//     const transporter = nodemailer.createTransport({
+//       service: "gmail",
+//       auth: {
+//         type: "OAuth2",
+//         user: process.env.SENDER_EMAIL,
+//         accessToken,
+//         clientId: process.env.OAUTH_CLIENT_ID,
+//         clientSecret: process.env.OAUTH_CLIENT_SECRET,
+//         refreshToken: process.env.OAUTH_REFRESH_TOKEN,
+//       },
+//     });
   
-    return transporter;
-  };
+//     return transporter;
+//   };
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.SENDER_EMAIL,
+    pass: process.env.SENDER_EMAIL_PASS
+  },
+});
 
 
 const mailSend = async (email, subject, message)  => {
@@ -63,10 +71,10 @@ const mailSend = async (email, subject, message)  => {
 
     try {
         // Get response from the createTransport
-        let emailTransporter = await createTransporter();
+        //let emailTransporter = await createTransporter();
         
         // Send email
-        emailTransporter.sendMail(mailOptions, function (error, info) {
+        transporter.sendMail(mailOptions, function (error, info) {
             if (error) {
                 // failed block
                 console.log(error);

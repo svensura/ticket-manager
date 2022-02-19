@@ -1,7 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 
-require('./db/mongoose')
+
 const userRouter = require('./routers/user')
 const venueRouter = require('./routers/venue')
 const gigRouter = require('./routers/gig')
@@ -9,6 +9,8 @@ const gigRouter = require('./routers/gig')
 
 const app = express()
 const port = process.env.PORT
+
+require('./db/mongoose')
 
 
 // app.use((req, res, next) => {
