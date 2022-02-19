@@ -36,15 +36,23 @@ const createTransporter = async () => {
     });
   
     // Authenticating and creating a method to send a mail
+    // const transporter = nodemailer.createTransport({
+    //   service: "gmail",
+    //   auth: {
+    //     type: "OAuth2",
+    //     user: process.env.SENDER_EMAIL,
+    //     accessToken,
+    //     clientId: process.env.OAUTH_CLIENT_ID,
+    //     clientSecret: process.env.OAUTH_CLIENT_SECRET,
+    //     refreshToken: process.env.OAUTH_REFRESH_TOKEN,
+    //   },
+    // });
+
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        type: "OAuth2",
         user: process.env.SENDER_EMAIL,
-        accessToken,
-        clientId: process.env.OAUTH_CLIENT_ID,
-        clientSecret: process.env.OAUTH_CLIENT_SECRET,
-        refreshToken: process.env.OAUTH_REFRESH_TOKEN,
+        pass: process.env.SENDER_EMAIL_PASS,
       },
     });
   
