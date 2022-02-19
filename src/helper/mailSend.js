@@ -1,6 +1,7 @@
 require("dotenv").config();
 // Nodemailer
-const nodemailer = require("nodemailer");
+const nodeoutlook = require('nodejs-nodemailer-outlook')
+
 
 // Googleapis
 const { google } = require("googleapis");
@@ -46,13 +47,13 @@ const OAuth2 = google.auth.OAuth2;
 //     return transporter;
 //   };
 
-const transporter = nodemailer.createTransport({
-  service: "hotmail",
-  auth: {
-    user: process.env.SENDER_EMAIL,
-    pass: process.env.SENDER_EMAIL_PASS
-  },
-});
+// const transporter = nodemailer.createTransport({
+//   service: "hotmail",
+//   auth: {
+//     user: process.env.SENDER_EMAIL,
+//     pass: process.env.SENDER_EMAIL_PASS
+//   },
+// });
 
 
 const mailSend = async (email, subject, message)  => {
@@ -63,10 +64,16 @@ const mailSend = async (email, subject, message)  => {
     // Mail options
 
     let mailOptions = {
+      auth: {
+        user: process.env.SENDER_EMAIL,
+        pass: process.env.SENDER_EMAIL_PASS
+        },
         from: process.env.SENDER_EMAIL,
         to: email,
         subject: subject,
         text: message,
+        onError: (e) => console.log(e),
+        onSuccess: (i) => console.log(i)
     };
 
     try {
@@ -74,15 +81,7 @@ const mailSend = async (email, subject, message)  => {
         //let emailTransporter = await createTransporter();
         
         // Send email
-        transporter.sendMail(mailOptions, function (error, info) {
-            if (error) {
-                // failed block
-                console.log(error);
-            } else {
-                // Success block
-                console.log("Email sent: " + info.response);
-            }
-        });
+        nodeoutlook.sendEmail(mailOptions);
     } catch (error) {
         return console.log(error);
     }
